@@ -1,46 +1,49 @@
-Convertitore Universale Multi-Formato
-Un'applicazione desktop basata su Python per la gestione e conversione di file PDF, immagini e video. Il software offre un'interfaccia grafica (GUI) intuitiva per eseguire operazioni comuni come la compressione, l'unione di file e il cambio di formato.
+# **Convertitore Universale Multi-Formato**
 
-Funzionalità
-PDF:
--Conversione PDF/A-1b: Ottimizzazione per l'archiviazione a lungo termine.
+Un'applicazione desktop basata su Python per la gestione e conversione di file PDF, immagini e video. 
 
--Compressione: Riduzione del peso del file con tre livelli di qualità.
+### **Funzionalità**
 
--Unione (Merge): Unione di più file PDF in un unico documento.
+**PDF:**
 
-Immagini:
--Conversione in PDF: Trasforma immagini singole o multiple (unite) in documenti PDF.
+-Conversione in PDF/A-1b
 
--Compressione: Ottimizzazione del peso (JPG/PNG).
+-Compressione del pdf con tre livelli di qualità
 
--Conversione in JPG: Conversione rapida da altri formati (PNG, HEIC, ecc.).
+-Unione di più pdf in uno singolo
 
-Video:
--Conversione in MP4: Standardizzazione dei video.
+**Immagini:**
 
--Compressione: Riduzione delle dimensioni tramite codec H.264 (CRF variabile).
+-Conversione di una o più immagini in pdf
 
-Requisiti Tecnici
-Dipendenze Python
-Per eseguire il codice sorgente, è necessario installare le seguenti librerie:
+-Compressione dell'immagine
 
+-Conversione in JPG
+
+**Video:**
+
+-Conversione in MP4
+
+-Compressione del video con tre livelli di qualità
+
+### **Requisiti Tecnici**
+
+-Dipendenze Python
+
+-Per eseguire il codice sorgente, è necessario installare le seguenti librerie:
 
 pip install pillow pikepdf
-Strumenti Esterni:
-Il progetto si appoggia a motori esterni per l'elaborazione dei media. Questi file non sono inclusi nel repository per motivi di licenza e dimensioni.
 
-Ghostscript: Necessario per l'unione e la compressione dei PDF.
+Il progetto si appoggia ai seguenti motori esterni motori esterni per l'elaborazione dei media.
+
+**Ghostscript**: Necessario per l'unione e la compressione dei PDF.
 
 Scarica l'eseguibile da Ghostscript Downloads.
 
 Estrai o installa il contenuto e inserisci la cartella di installazione rinominandola in gs all'interno della directory principale del progetto (il percorso atteso è gs/bin/gswin64c.exe).
 
-FFmpeg: Necessario per la gestione dei video.
+**FFmpeg**: Necessario per la gestione dei video.
 
 Scarica l'eseguibile da FFmpeg.org.
 
 Inserisci il file ffmpeg.exe direttamente nella cartella principale del progetto.
-
-Licenza:
-Questo progetto è distribuito sotto licenza MIT. Consulta il file LICENSE per ulteriori dettagli.
