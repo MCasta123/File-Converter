@@ -1,8 +1,8 @@
-#**Convertitore Universale Multi-Formato**
+# **Convertitore Universale Multi-Formato**
 
 Un'applicazione desktop basata su Python per la gestione e conversione di file PDF, immagini e video. 
 
-###**Funzionalità**
+### **Funzionalità**
 
 **PDF:**
 
@@ -26,7 +26,7 @@ Un'applicazione desktop basata su Python per la gestione e conversione di file P
 
 -Compressione del video con tre livelli di qualità
 
-###**Requisiti Tecnici**
+### **Requisiti Tecnici**
 
 -Dipendenze Python
 
