@@ -7,41 +7,41 @@ import sys
 
 ################################################################################################################################
 
-def scegliFile():
+def chose_file():
     root = tkinter.Tk()
     root.withdraw() #creato finestra e nascosta
     root.attributes('-topmost', True)
  #Apri l'Esplora Risorse vero e proprio
-    percorso_file = filedialog.askopenfilenames(
+    file_path = filedialog.askopenfilenames(
         title="Seleziona i file da convertire",
         filetypes=[("TUTTI I FILE","*.*"),("PDF", "*.pdf"),("IMMAGINI","*.jpg *.jpeg *.png *.HEIC"),("VIDEO","*.mp4 *.mov")]
     )
     root.destroy()  #distruggo finestra
-    return percorso_file
+    return file_path
 
 #####################################################################################################################################
 
-def salvaConNome(estensione):
+def save_as(estensione):
     root = tkinter.Tk()
     root.withdraw() #creato finestra e nascosta
     root.attributes('-topmost', True)
-    percorso_salvataggio = filedialog.asksaveasfilename(title="Salva file convertito come...",defaultextension=estensione)
+    saving_path = filedialog.asksaveasfilename(title="Salva file convertito come...",defaultextension=estensione)
     root.destroy()
-    return percorso_salvataggio
+    return saving_path
 
 ####################################################################################################################################à##
 
-def scegliCartella():
+def chose_directory():
     root=tkinter.Tk()
     root.withdraw()
     root.attributes('-topmost', True)
-    cartellaSalvataggio=filedialog.askdirectory(title='Scegli cartella in cui salvare..')
+    saving_directory=filedialog.askdirectory(title='Scegli cartella in cui salvare..')
     root.destroy()
-    return cartellaSalvataggio
+    return saving_directory
 
 #######################################################################################################################################
 
-def trova_eseguibile(nome_eseguibile, pattern_windows_fallback=None):
+def search_executable(executable_name, pattern_windows_fallback=None):
     """
     Cerca un eseguibile nel sistema in questo ordine:
     1. PATH di sistema
@@ -49,41 +49,41 @@ def trova_eseguibile(nome_eseguibile, pattern_windows_fallback=None):
     3. Chiede all'utente
     """
    
-    nome_eseguibile_str = str(nome_eseguibile)
+    str_executable_name = str(executable_name)
 
-    percorso = shutil.which(nome_eseguibile_str)
-    if percorso:
-        return percorso
+    path = shutil.which(str_executable_name)
+    if path:
+        return path
         
     if os.name == 'nt' and pattern_windows_fallback:
         for pattern in pattern_windows_fallback:
-            risultati = glob.glob(pattern)
-            if risultati:
-                return risultati[0] # Ritorna il primo trovato
+            results = glob.glob(pattern)
+            if results:
+                return results[0] # Ritorna il primo trovato
                 
     #Chiediamo all'utente
-    print(f"\n[!] Non riesco a trovare l'eseguibile: {nome_eseguibile_str}")
+    print(f"\n[!] Non riesco a trovare l'eseguibile: {str_executable_name}")
     print("Selezionalo manualmente dalla finestra che sta per aprirsi...")
     
     root = tkinter.Tk()
     root.withdraw()
     root.attributes('-topmost', True)
-    percorso_manuale = filedialog.askopenfilename(
-        title=f"Trova {nome_eseguibile_str}",
+    manual_path = filedialog.askopenfilename(
+        title=f"Trova {str_executable_name}",
         filetypes=[("Eseguibili", "*.exe")] if os.name == 'nt' else [("Tutti i file", "*.*")]
     )
     root.destroy()
     
-    if percorso_manuale:
-        return percorso_manuale
+    if manual_path:
+        return manual_path
     else:
-        raise FileNotFoundError(f"L'eseguibile {nome_eseguibile_str} è strettamente necessario per continuare.")
+        raise FileNotFoundError(f"L'eseguibile {str_executable_name} è strettamente necessario per continuare.")
     
 #######################################################################################################################################
 
-def ottieni_percorso_base():
+def get_base_path():
     """ 
-    Restituisce il percorso assoluto in cui si trova il programma,
+    Restituisce il path assoluto in cui si trova il programma,
     sia che sia eseguito come script .py, sia come .exe compilato. 
     """
     if getattr(sys, 'frozen', False):
