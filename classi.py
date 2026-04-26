@@ -32,7 +32,7 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
         return {}
 
     @abstractmethod
-    def choose_action(self,choice,directory_path,extra_parameters={}): #costringo le classi figlie a implementarlo
+    def choose_action(self,choice,directory_path,extra_parameters=None): #costringo le classi figlie a implementarlo
         pass
     @abstractmethod
     def get_available_actions(self): #costringo le classi figlie a implementarlo
@@ -61,7 +61,9 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
         print('---->Per comprimere il pdf premere 2')
         print('---->Per unire i pdf premere 3')
 
-    def choose_action(self,choice,directory_path='',extra_parameters={}):
+    def choose_action(self,choice,directory_path='',extra_parameters=None):
+        if extra_parameters is None:
+            extra_parameters={}
         choice_map={
             1 : self._convert_to_PDFA,
             2 : self._compress_PDF, 
@@ -174,7 +176,9 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
             print('ERRORE RIPROVARE')
             return
 
-    def _merge_PDF(self,files_paths=[]):   
+    def _merge_PDF(self,files_paths=None):   
+        if files_paths is None:
+            files_paths=[]
         if files_paths:
             if len(files_paths)<=1:
                 print('Seleziona più pdf da unire')
@@ -214,7 +218,9 @@ class ImageFile(GenericFile):
         print('---->Per comprimere l\'immage premere 2')
         print('---->Per convertire l\'immage in jpg premere 3')
 
-    def choose_action(self,choice,directory_path='',extra_parameters={}):
+    def choose_action(self,choice,directory_path='',extra_parameters=None):
+        if extra_parameters is None:
+            extra_parameters={}
         choice_map={
             1 : self._convert_to_PDF,
             2 : self._immage_compress,
@@ -239,7 +245,9 @@ class ImageFile(GenericFile):
         else:
             return {}
 
-    def _convert_to_PDF(self,file_list=[]):
+    def _convert_to_PDF(self,file_list=None):
+        if file_list is None:
+            file_list=[]
         if file_list:
             output_path = save_as('.pdf')
             if not output_path:
@@ -331,7 +339,9 @@ class VideoFile(GenericFile):
         ]
         self.ffmpeg_exe = search_executable("ffmpeg", percorsi_comuni_ffmpeg)
         
-    def choose_action(self,choice,directory_path,extra_parameters):
+    def choose_action(self,choice,directory_path,extra_parameters=None):
+        if extra_parameters is None:
+            extra_parameters={}
         choice_map={
             1 : self._convert_to_mp4,
             2 : self._video_compress 
