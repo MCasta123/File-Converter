@@ -1,5 +1,6 @@
 from funzioni import *
 from classi import *
+import traceback
 
 
 while True: #LOOP CHE FA CCONTINUARE IL PROGRAMMA
@@ -35,6 +36,7 @@ while True: #LOOP CHE FA CCONTINUARE IL PROGRAMMA
                 print('Inserire un numero valido')
             except Exception as e:
                 print(f"ERRORE TECNICO: {e}")
+                traceback.print_exc()  # stampa il traceback completo
                    
             
             print('Premere INVIO per una nuova operazione')

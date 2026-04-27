@@ -1,4 +1,5 @@
-import os, sys
+import os
+import PIL
 from PIL import Image
 from pathlib import Path  #libreria importata per estrarre facilmente l' extension del file
 import os
@@ -112,29 +113,29 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
         print("Conversione a PDF/A-1b")
         
         try:
-            pdf = pikepdf.open(self.path)
+            with pikepdf.open(self.path,'r') as pdf:
+                # Aggiungi metadati XMP per PDF/A-1b
+                with pdf.open_metadata(set_pikepdf_as_editor=False) as meta:
+                    meta['pdfaid:part'] = '1'
+                    meta['pdfaid:conformance'] = 'B'
+                    meta['dc:format'] = 'application/pdf'
+                    meta['pdf:Producer'] = 'pikepdf PDF/A Converter'
+                
+                # Salva con ottimizzazioni
+                pdf.save(
+                    output_path,
+                    linearize=True,
+                    compress_streams=True,
+                    object_stream_mode=pikepdf.ObjectStreamMode.generate
+                )
+                
+                
+                print(f"PDF/A-1b salvato: {output_path}")
             
-            # Aggiungi metadati XMP per PDF/A-1b
-            with pdf.open_metadata(set_pikepdf_as_editor=False) as meta:
-                meta['pdfaid:part'] = '1'
-                meta['pdfaid:conformance'] = 'B'
-                meta['dc:format'] = 'application/pdf'
-                meta['pdf:Producer'] = 'pikepdf PDF/A Converter'
-            
-            # Salva con ottimizzazioni
-            pdf.save(
-                output_path,
-                linearize=True,
-                compress_streams=True,
-                object_stream_mode=pikepdf.ObjectStreamMode.generate
-            )
-            
-            pdf.close()
-            
-            print(f"PDF/A-1b salvato: {output_path}")
-            
-        except Exception as e:
-            print(f"Errore: {e}")
+        except pikepdf.PdfError as e:
+            print(f"PDF corrotto o non leggibile: {e}")
+        except OSError as e:
+            print(f"Errore di lettura/scrittura file: {e}")
 
    
     def _compress_PDF(self,directory_path,quality):
@@ -167,11 +168,17 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
                     f'-sOutputFile={output_path}',
                     self.path]
                 
-                subprocess.run(command)
+                subprocess.run(command, check=True)
                 print(f'Il file {os.path.basename(self.path)} prima pesava: {(os.path.getsize(self.path)/1048576):.3f} MB')
                 print(f'Il file convertito {os.path.basename(output_path)} adesso pesa: {(os.path.getsize(output_path)/1048576):.3f} MB')
-            except:
-                print('Si è verificato un errore riprovare')
+            except subprocess.CalledProcessError as e:
+                print(f'Errore ghostscript : {e}')
+            except FileNotFoundError as e:
+                print('Eseguibile di ghostscript non trovato')
+            except OSError as e:
+                print(f'Errore di disco : {e}') 
+            
+
         else:
             print('ERRORE RIPROVARE')
             return
@@ -199,8 +206,12 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
                 command.extend(files_paths)
                 subprocess.run(command, check=True, capture_output=True)
                 print(f'I pdf sono stati uniti correttamente nel file {os.path.basename(output_path)}')
-            except:
-                print('ERRORE,riprovare')
+            except subprocess.CalledProcessError as e:
+                print(f'Errore ghostscript : {e}')
+            except FileNotFoundError as e:
+                print('Eseguibile di ghostscript non trovato')
+            except OSError as e:
+                print(f'Errore di disco : {e}') 
             
 
 #######################################################################################################################
@@ -264,8 +275,15 @@ class ImageFile(GenericFile):
                     other_immage.append(img_temp)
                 img1.save(output_path,'PDF',save_all=True,append_images=other_immage)
                 print(f'Il file {os.path.basename(output_path)} è stato creato correttamente')
-            except Exception as e:
-                print(f'Errore nella creazione del pdf {e}')
+            except PIL.UnidentifiedImageError as e:
+                print(f'Errore nell\' apertura dell\'immagine : {e}')
+            except OSError as e:
+                print(f'Errore nel salvataggio del file {e}')
+            finally:    #blocco che si assicura che a prescindere tutte le immagini aperte vengano chiuse
+                for img in other_immage:
+                    img.close()
+                img1.close()
+
         else:
             print('ERRORE,riprovare')
 
@@ -292,9 +310,10 @@ class ImageFile(GenericFile):
                     img.save(output_path, optimize=True)
             print(f'Il file {os.path.basename(self.path)} prima pesava: {(os.path.getsize(self.path)/1048576):.3f} MB')
             print(f'Il file convertito {os.path.basename(output_path)} adesso pesa: {(os.path.getsize(output_path)/1048576):.3f} MB')
-        except:
-            print('ERRORE, riprovare')
-            return
+        except PIL.UnidentifiedImageError as e:
+            print(f'Errore nell\' apertura dell\'immagine : {e}')
+        except OSError as e:
+            print(f'Errore nel salvataggio del file {e}')
 
 
     def _converto_to_JPG(self,directory_path):
@@ -319,9 +338,10 @@ class ImageFile(GenericFile):
                     im = im.convert("RGB")
                 im.save(output_path, "JPEG", quality=100, subsampling=0)
             print(f'Il file {os.path.basename(self.path)} è stato convertito correttamente in jpg')
-        except:
-            print('ERRORE, riprovare')
-            return
+        except PIL.UnidentifiedImageError as e:
+            print(f'Errore nell\' apertura dell\'immagine : {e}')
+        except OSError as e:
+            print(f'Errore nel salvataggio del file {e}')
 
 #############################################################################################################################
 #############################################################################################################################
@@ -403,11 +423,14 @@ class VideoFile(GenericFile):
                 '-strict', 'experimental', 
                 output_path]
             
-            subprocess.run(command,capture_output=True,text=True)
+            subprocess.run(command,capture_output=True,text=True,check=True)
             print(f'Il file {os.path.basename(self.path)} è stato convertito correttamente in {os.path.basename(output_path)}')
-        except:
-            print('Errore, riprovare')
-            return
+        except subprocess.CalledProcessError as e:
+                print(f'Errore ffmpeg : {e}')
+        except FileNotFoundError as e:
+                print('Eseguibile di ffmpeg non trovato')
+        except OSError as e:
+                print(f'Errore di disco : {e}')
         
 
     def _video_compress(self,directory_path,quality):
@@ -448,8 +471,12 @@ class VideoFile(GenericFile):
                 print(f'Il file {os.path.basename(self.path)} prima pesava: {(os.path.getsize(self.path)/1048576):.3f} MB')
                 print(f'Il file compresso {os.path.basename(output_path)} adesso pesa: {(os.path.getsize(output_path)/1048576):.3f} MB')
             
-            except:
-                print('ERRORE, riprovare')
+            except subprocess.CalledProcessError as e:
+                    print(f'Errore ffmpeg : {e}')
+            except FileNotFoundError as e:
+                    print('Eseguibile di ffmpeg non trovato')
+            except OSError as e:
+                    print(f'Errore di disco : {e}')
         else:
             print('Scegliere una qualità giusta')
             return
