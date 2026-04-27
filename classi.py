@@ -1,5 +1,6 @@
 import os
 from PIL import Image, UnidentifiedImageError
+from pillow_heif import register_heif_opener
 from pathlib import Path  #libreria importata per estrarre facilmente l' extension del file
 from abc import ABC, abstractmethod
 import subprocess
@@ -7,7 +8,8 @@ import pikepdf
 from funzioni import save_as, search_executable, get_base_path
 
 
-
+# Inizializza il plugin per leggere i file HEIC (Apple)
+register_heif_opener()
 
 #############################################################################################################################
 #############################################################################################################################
