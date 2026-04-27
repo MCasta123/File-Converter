@@ -49,7 +49,7 @@ while True: #LOOP CHE FA CCONTINUARE IL PROGRAMMA
 
         else:
             print('ERRORE')
-            print('I formati supportati sono: pdf, jpg, jpeg, png, mov, mp4')
+            print('I formati supportati sono: pdf, jpg, jpeg, png, heic, mov, mp4')
             print('Si ricorda inoltre che in caso di selezione di più file, i file devono essere dello stesso tipo (es: tutte immagini---->quindi jpg jpeg png)')
             print('Premere INVIO per riprovare')
             check=input()

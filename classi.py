@@ -55,7 +55,7 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
             constructor=extension_map[extension]
             return constructor(file_path)
         else:
-            raise ValueError('fUnsupported file extension: {extension}')
+            raise ValueError(f'Unsupported file extension: {extension}')
 
     def add_extra_parameters(self, choice: int, file_list: list | None = None) -> dict:
         """
@@ -249,8 +249,8 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
                     '-dBATCH',
                     f'-sOutputFile={output_path}',
                     self.path]
-                
-                subprocess.run(command, check=True)
+                flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0 #check if os=windows if true don't show the terminal when subprocess is called
+                subprocess.run(command, check=True, capture_output=True, text=True, creationflags=flags)
                 print(f'Il file {os.path.basename(self.path)} prima pesava: {(os.path.getsize(self.path)/1048576):.3f} MB')
                 print(f'Il file convertito {os.path.basename(output_path)} adesso pesa: {(os.path.getsize(output_path)/1048576):.3f} MB')
             except subprocess.CalledProcessError as e:
@@ -297,7 +297,8 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
             
                 # Aggiungiamo tutti i file di input alla lista del command
                 command.extend(files_paths)
-                subprocess.run(command, check=True, capture_output=True)
+                flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0 #check if os=windows if true don't show the terminal when subprocess is called
+                subprocess.run(command, check=True, capture_output=True, text=True, creationflags=flags)
                 print(f'I pdf sono stati uniti correttamente nel file {os.path.basename(output_path)}')
             except subprocess.CalledProcessError as e:
                 print(f'Errore ghostscript : {e}')
@@ -572,7 +573,8 @@ class VideoFile(GenericFile):
                 '-strict', 'experimental', 
                 output_path]
             
-            subprocess.run(command,capture_output=True,text=True,check=True)
+            flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0 #check if os=windows if true don't show the terminal when subprocess is called
+            subprocess.run(command, check=True, capture_output=True, text=True, creationflags=flags)
             print(f'Il file {os.path.basename(self.path)} è stato convertito correttamente in {os.path.basename(output_path)}')
         except subprocess.CalledProcessError as e:
                 print(f'Errore ffmpeg : {e}')
@@ -628,7 +630,8 @@ class VideoFile(GenericFile):
                     '-b:a', '128k',      
                     output_path          
                 ]
-                subprocess.run(command,check=True,capture_output=True)
+                flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0 #check if os=windows if true don't show the terminal when subprocess is called
+                subprocess.run(command, check=True, capture_output=True, text=True, creationflags=flags)
                 print(f'Il file {os.path.basename(self.path)} prima pesava: {(os.path.getsize(self.path)/1048576):.3f} MB')
                 print(f'Il file compresso {os.path.basename(output_path)} adesso pesa: {(os.path.getsize(output_path)/1048576):.3f} MB')
             
