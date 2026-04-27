@@ -55,7 +55,7 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
             constructor=extension_map[extension]
             return constructor(file_path)
         else:
-            print('Estensione non trovata')
+            raise ValueError('fUnsupported file extension: {extension}')
 
     def add_extra_parameters(self, choice: int, file_list: list | None = None) -> dict:
         """

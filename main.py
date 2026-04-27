@@ -8,8 +8,11 @@ while True: #LOOP CHE FA CCONTINUARE IL PROGRAMMA
     files_paths=chose_file()   #permetto di scegliere uno o più file
     if files_paths:    #controllo che non sia vuota la tupla
         if check_homogeneity(files_paths):   #controllo che tutti i file siano relativi alla stessa classe
-            temp_object=GenericFile.create_from_path(files_paths[0])
-            temp_object.get_available_actions()
+            try:
+                temp_object=GenericFile.create_from_path(files_paths[0])
+                temp_object.get_available_actions()
+            except ValueError as e:
+                print(f'ERRORE : {e}')
             try:
                 choice=int(input())
                 directory_path=''
