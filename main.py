@@ -1,5 +1,5 @@
-from funzioni import *
-from classi import *
+from funzioni import chose_directory,chose_file
+from classi import GenericFile, check_homogeneity
 import traceback
 
 

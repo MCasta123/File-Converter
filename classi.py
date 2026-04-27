@@ -1,8 +1,6 @@
 import os
-import PIL
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from pathlib import Path  #libreria importata per estrarre facilmente l' extension del file
-import os
 from abc import ABC, abstractmethod
 import subprocess
 import pikepdf
@@ -275,7 +273,7 @@ class ImageFile(GenericFile):
                     other_immage.append(img_temp)
                 img1.save(output_path,'PDF',save_all=True,append_images=other_immage)
                 print(f'Il file {os.path.basename(output_path)} è stato creato correttamente')
-            except PIL.UnidentifiedImageError as e:
+            except UnidentifiedImageError as e:
                 print(f'Errore nell\' apertura dell\'immagine : {e}')
             except OSError as e:
                 print(f'Errore nel salvataggio del file {e}')
@@ -310,7 +308,7 @@ class ImageFile(GenericFile):
                     img.save(output_path, optimize=True)
             print(f'Il file {os.path.basename(self.path)} prima pesava: {(os.path.getsize(self.path)/1048576):.3f} MB')
             print(f'Il file convertito {os.path.basename(output_path)} adesso pesa: {(os.path.getsize(output_path)/1048576):.3f} MB')
-        except PIL.UnidentifiedImageError as e:
+        except UnidentifiedImageError as e:
             print(f'Errore nell\' apertura dell\'immagine : {e}')
         except OSError as e:
             print(f'Errore nel salvataggio del file {e}')
@@ -338,7 +336,7 @@ class ImageFile(GenericFile):
                     im = im.convert("RGB")
                 im.save(output_path, "JPEG", quality=100, subsampling=0)
             print(f'Il file {os.path.basename(self.path)} è stato convertito correttamente in jpg')
-        except PIL.UnidentifiedImageError as e:
+        except UnidentifiedImageError as e:
             print(f'Errore nell\' apertura dell\'immagine : {e}')
         except OSError as e:
             print(f'Errore nel salvataggio del file {e}')
