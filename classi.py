@@ -14,12 +14,28 @@ from funzioni import save_as, search_executable, get_base_path
 #############################################################################################################################
 
 class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa nel main bisogna chimare solo il metodo statico
-    def __init__(self,file_path):
+    def __init__(self, file_path: str) -> None:
+        """
+        Initializes the generic file object with basic file metadata.
+
+        Args:
+            file_path: Absolute path to the file.
+        """
         self.path=file_path
         self.name=os.path.basename(file_path)
         self.file_dimension=os.path.getsize(file_path)
+
     @staticmethod
-    def create_from_path(file_path):  
+    def create_from_path(file_path: str) -> 'GenericFile':
+        """
+        Factory method that creates the appropriate file object based on the file extension.
+
+        Args:
+            file_path: Absolute path to the file.
+
+        Returns:
+            An instance of the appropriate GenericFile subclass.
+        """
         extension=Path(file_path).suffix.lower()   #prendo l'extension
         if extension in extension_map:   #controllo se c' è l' extension, con la mappa ricavo il constructor e lo chiamo
             constructor=extension_map[extension]
@@ -27,14 +43,35 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
         else:
             print('Estensione non trovata')
 
-    def add_extra_parameters(self,choice,file_list=None):   #medoto che di base restituisce un dizionario vuoto, ma dovrà essere sovrascritto dalle classi figlie
+    def add_extra_parameters(self, choice: int, file_list: list | None = None) -> dict:
+        """
+        Collects additional parameters needed before executing the chosen action.
+        Base implementation returns an empty dict. Subclasses should override this.
+
+        Args:
+            choice: The action number selected by the user.
+            file_list: List of file paths involved in the operation.
+
+        Returns:
+            A dictionary of extra parameters, or {'stop': True} to abort the main loop.
+        """
         return {}
 
     @abstractmethod
-    def choose_action(self,choice,directory_path,extra_parameters=None): #costringo le classi figlie a implementarlo
+    def choose_action(self, choice: int, directory_path: str, extra_parameters: dict | None = None) -> None:
+        """
+        Executes the action corresponding to the user's choice.
+
+        Args:
+            choice: The action number selected by the user.
+            directory_path: Output folder path. Empty string if saving a single file via dialog.
+            extra_parameters: Additional parameters required by specific actions.
+        """
         pass
+
     @abstractmethod
-    def get_available_actions(self): #costringo le classi figlie a implementarlo
+    def get_available_actions(self) -> None:
+        """Prints the list of available actions for this file type."""
         pass
 
 #############################################################################################################################
@@ -42,7 +79,13 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
 #############################################################################################################################
 
 class PDFFile(GenericFile):        #classe che gestisce i file pdf
-    def __init__(self, file_path):
+    def __init__(self, file_path: str) -> None:
+        """
+        Initializes the PDFFile object and locates the GhostScript executable.
+
+        Args:
+            file_path: Absolute path to the PDF file.
+        """
         super().__init__(file_path)
         script_directory = get_base_path()
         percorsi_comuni_gs = [
@@ -54,13 +97,13 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
         
         self.gs_exe = search_executable("gswin64c", percorsi_comuni_gs)
 
-    def get_available_actions(self):
+    def get_available_actions(self) -> None:
         print('Le azioni disponibili sono: \n')
         print('---->Per convertire il pdf in pdf/A premere 1')
         print('---->Per comprimere il pdf premere 2')
         print('---->Per unire i pdf premere 3')
 
-    def choose_action(self,choice,directory_path='',extra_parameters=None):
+    def choose_action(self, choice: int, directory_path: str = '', extra_parameters: dict | None = None) -> None:
         if extra_parameters is None:
             extra_parameters={}
         choice_map={
@@ -81,7 +124,7 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
             print('SCELTA NON GIUSTA')
             return
 
-    def add_extra_parameters(self, choice,file_list=None):
+    def add_extra_parameters(self, choice: int, file_list: list | None = None) -> dict:
         if choice==2:
             print('Scegli la qualità di compressione: \n')
             print('----->Premere 1 per qualità alta, compressione bassa')
@@ -96,7 +139,17 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
         else:
             return {}
 
-    def _convert_to_PDFA(self,directory_path):
+    def _convert_to_PDFA(self, directory_path: str) -> None:
+        """
+        Converts the PDF file to PDF/A-1b format by adding XMP metadata.
+
+        Args:
+            directory_path: Output folder path. Empty string if saving via dialog.
+
+        Raises:
+            pikepdf.PdfError: If the PDF is corrupted or cannot be read.
+            OSError: If the output file cannot be written.
+        """
         if directory_path=='': #un file solo
             output_path = save_as(".pdf")
         else:   #gestione di più file
@@ -136,7 +189,19 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
             print(f"Errore di lettura/scrittura file: {e}")
 
    
-    def _compress_PDF(self,directory_path,quality):
+    def _compress_PDF(self, directory_path: str, quality: int) -> None:
+        """
+        Compresses the PDF file using GhostScript.
+
+        Args:
+            directory_path: Output folder path. Empty string if saving via dialog.
+            quality: Compression level — 1 (low compression), 2 (medium), 3 (high compression).
+
+        Raises:
+            subprocess.CalledProcessError: If GhostScript returns an error.
+            FileNotFoundError: If the GhostScript executable is not found.
+            OSError: If the output file cannot be written or read.
+        """
         quality_map={
             1 : '/prepress',
             2 : '/ebook',
@@ -181,7 +246,18 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
             print('ERRORE RIPROVARE')
             return
 
-    def _merge_PDF(self,files_paths=None):   
+    def _merge_PDF(self, files_paths: list | None = None) -> None:
+        """
+        Merges multiple PDF files into a single output file using GhostScript.
+
+        Args:
+            files_paths: List of absolute paths to the PDF files to merge.
+
+        Raises:
+            subprocess.CalledProcessError: If GhostScript returns an error.
+            FileNotFoundError: If the GhostScript executable is not found.
+            OSError: If the output file cannot be written.
+        """
         if files_paths is None:
             files_paths=[]
         if files_paths:
@@ -217,17 +293,22 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
 #######################################################################################################################
 
 class ImageFile(GenericFile):
-    def __init__(self, file_path):
+    def __init__(self, file_path: str) -> None:
+        """
+        Initializes the ImageFile object.
+
+        Args:
+            file_path: Absolute path to the image file.
+        """
         super().__init__(file_path)
 
-
-    def get_available_actions(self):
+    def get_available_actions(self) -> None:
         print('Le azioni disponibili sono: \n')
         print('---->Per convertire l\'immagini in pdf premere 1')
         print('---->Per comprimere l\'immage premere 2')
         print('---->Per convertire l\'immage in jpg premere 3')
 
-    def choose_action(self,choice,directory_path='',extra_parameters=None):
+    def choose_action(self, choice: int, directory_path: str = '', extra_parameters: dict | None = None) -> None:
         if extra_parameters is None:
             extra_parameters={}
         choice_map={
@@ -244,8 +325,7 @@ class ImageFile(GenericFile):
             print('SCELTA NON GIUSTA')
             return
 
-    
-    def add_extra_parameters(self,choice,file_list=None):
+    def add_extra_parameters(self, choice: int, file_list: list | None = None) -> dict:
         if choice==1:       #qui non si aggiunge parametri extra ma si usa la funzione per chiamarne un altra senza fare il ciclo for del main
             if file_list:   #serve per quando si passa più file ma se ne vuole solo uno in output, quindi la funzione unisce i file in uno
                
@@ -254,7 +334,17 @@ class ImageFile(GenericFile):
         else:
             return {}
 
-    def _convert_to_PDF(self,file_list=None):
+    def _convert_to_PDF(self, file_list: list | None = None) -> None:
+        """
+        Converts one or more images into a single PDF file.
+
+        Args:
+            file_list: List of absolute paths to the image files to convert.
+
+        Raises:
+            UnidentifiedImageError: If an image file is corrupted or unrecognized.
+            OSError: If the output file cannot be written.
+        """
         if file_list is None:
             file_list=[]
         if file_list:
@@ -286,7 +376,17 @@ class ImageFile(GenericFile):
             print('ERRORE,riprovare')
 
 
-    def _immage_compress(self,directory_path):
+    def _immage_compress(self, directory_path: str) -> None:
+        """
+        Compresses the image file, preserving its original format.
+
+        Args:
+            directory_path: Output folder path. Empty string if saving via dialog.
+
+        Raises:
+            UnidentifiedImageError: If the image file is corrupted or unrecognized.
+            OSError: If the output file cannot be written.
+        """
         extension=Path(self.path).suffix.lower()
         if directory_path=='': #un file solo
             output_path = save_as(extension)
@@ -314,7 +414,17 @@ class ImageFile(GenericFile):
             print(f'Errore nel salvataggio del file {e}')
 
 
-    def _converto_to_JPG(self,directory_path):
+    def _converto_to_JPG(self, directory_path: str) -> None:
+        """
+        Converts the image to JPEG format.
+
+        Args:
+            directory_path: Output folder path. Empty string if saving via dialog.
+
+        Raises:
+            UnidentifiedImageError: If the image file is corrupted or unrecognized.
+            OSError: If the output file cannot be written.
+        """
         extension=Path(self.path).suffix.lower()
         if extension in ['.jpg', '.jpeg']:
             print(f'L\'immage {os.path.basename(self.path)} è già un jpg')
@@ -346,7 +456,13 @@ class ImageFile(GenericFile):
 #############################################################################################################################
 
 class VideoFile(GenericFile):
-    def __init__(self, file_path):
+    def __init__(self, file_path: str) -> None:
+        """
+        Initializes the VideoFile object and locates the ffmpeg executable.
+
+        Args:
+            file_path: Absolute path to the video file.
+        """
         super().__init__(file_path)
         script_directory = get_base_path() 
         
@@ -357,7 +473,7 @@ class VideoFile(GenericFile):
         ]
         self.ffmpeg_exe = search_executable("ffmpeg", percorsi_comuni_ffmpeg)
         
-    def choose_action(self,choice,directory_path,extra_parameters=None):
+    def choose_action(self, choice: int, directory_path: str, extra_parameters: dict | None = None) -> None:
         if extra_parameters is None:
             extra_parameters={}
         choice_map={
@@ -377,12 +493,12 @@ class VideoFile(GenericFile):
             print('SCELTA NON GIUSTA')
             return
         
-    def get_available_actions(self):
+    def get_available_actions(self) -> None:
         print('Le azioni disponibili sono: \n')
         print('---->Per convertire il video in mp4 premere 1')
         print('---->Per comprimere il video premere 2')
     
-    def add_extra_parameters(self, choice,file_list=None):
+    def add_extra_parameters(self, choice: int, file_list: list | None = None) -> dict:
         if choice==2:
             print('Selezionare la qualità di compressione:')
             print('---->Premere 1 per compressione leggera: ')
@@ -393,7 +509,18 @@ class VideoFile(GenericFile):
         else:
             return {}
 
-    def _convert_to_mp4(self,directory_path):
+    def _convert_to_mp4(self, directory_path: str) -> None:
+        """
+        Converts the video file to MP4 format using ffmpeg.
+
+        Args:
+            directory_path: Output folder path. Empty string if saving via dialog.
+
+        Raises:
+            subprocess.CalledProcessError: If ffmpeg returns an error.
+            FileNotFoundError: If the ffmpeg executable is not found.
+            OSError: If the output file cannot be written.
+        """
         extension=Path(self.path).suffix.lower()
         if extension=='.mp4':
             print(f'Il file {os.path.basename(self.path)} è già mp4')
@@ -431,7 +558,19 @@ class VideoFile(GenericFile):
                 print(f'Errore di disco : {e}')
         
 
-    def _video_compress(self,directory_path,quality):
+    def _video_compress(self, directory_path: str, quality: int) -> None:
+        """
+        Compresses the video file using ffmpeg with the H.264 codec.
+
+        Args:
+            directory_path: Output folder path. Empty string if saving via dialog.
+            quality: Compression level — 1 (light), 2 (medium), 3 (heavy).
+
+        Raises:
+            subprocess.CalledProcessError: If ffmpeg returns an error.
+            FileNotFoundError: If the ffmpeg executable is not found.
+            OSError: If the output file cannot be written or read.
+        """
         quality_map={
             1 : '23',
             2 : '28',
@@ -499,7 +638,16 @@ extension_map={       #mappa per decidere il constructor da chiamare
 #############################################################################################################################
 #############################################################################################################################
 
-def check_homogeneity(files_paths):
+def check_homogeneity(files_paths: list) -> bool:
+    """
+    Checks that all selected files belong to the same supported file type.
+
+    Args:
+        files_paths: List of absolute paths to the files to check.
+
+    Returns:
+        True if all files map to the same class, False otherwise.
+    """
     extension=Path(files_paths[0]).suffix.lower()
     if extension in extension_map:
         file_type=extension_map[extension]

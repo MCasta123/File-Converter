@@ -7,7 +7,14 @@ import sys
 
 ################################################################################################################################
 
-def chose_file():
+def chose_file() -> tuple:
+    """
+    Opens a file dialog to select one or more files.
+
+    Returns:
+        A tuple of absolute file paths selected by the user.
+        Returns an empty tuple if the user cancels.
+    """
     root = tkinter.Tk()
     root.withdraw() #creato finestra e nascosta
     root.attributes('-topmost', True)
@@ -21,7 +28,16 @@ def chose_file():
 
 #####################################################################################################################################
 
-def save_as(estensione):
+def save_as(estensione: str) -> str:
+    """
+    Opens a save dialog to choose where to save the output file.
+
+    Args:
+        estensione: Default file extension for the saved file (e.g. '.pdf').
+
+    Returns:
+        The absolute path chosen by the user, or an empty string if cancelled.
+    """
     root = tkinter.Tk()
     root.withdraw() #creato finestra e nascosta
     root.attributes('-topmost', True)
@@ -29,9 +45,15 @@ def save_as(estensione):
     root.destroy()
     return saving_path
 
-####################################################################################################################################à##
+####################################################################################################################################
 
-def chose_directory():
+def chose_directory() -> str:
+    """
+    Opens a dialog to choose a destination folder.
+
+    Returns:
+        The absolute path of the chosen directory, or an empty string if cancelled.
+    """
     root=tkinter.Tk()
     root.withdraw()
     root.attributes('-topmost', True)
@@ -41,12 +63,22 @@ def chose_directory():
 
 #######################################################################################################################################
 
-def search_executable(executable_name, pattern_windows_fallback=None):
+def search_executable(executable_name: str, pattern_windows_fallback: list | None = None) -> str:
     """
-    Cerca un eseguibile nel sistema in questo ordine:
-    1. PATH di sistema
-    2. Percorsi standard (Windows)
-    3. Chiede all'utente
+    Searches for an executable in the system in the following order:
+    1. System PATH
+    2. Common Windows paths (fallback patterns)
+    3. Manual selection via file dialog
+
+    Args:
+        executable_name: Name of the executable to search for (e.g. 'ffmpeg').
+        pattern_windows_fallback: List of glob patterns to try on Windows if PATH search fails.
+
+    Returns:
+        The absolute path to the found executable.
+
+    Raises:
+        FileNotFoundError: If the executable cannot be found and the user cancels the manual selection.
     """
    
     str_executable_name = str(executable_name)
@@ -81,10 +113,13 @@ def search_executable(executable_name, pattern_windows_fallback=None):
     
 #######################################################################################################################################
 
-def get_base_path():
+def get_base_path() -> str:
     """ 
-    Restituisce il path assoluto in cui si trova il programma,
-    sia che sia eseguito come script .py, sia come .exe compilato. 
+    Returns the absolute path of the directory where the program is located,
+    whether it is running as a .py script or as a compiled .exe.
+
+    Returns:
+        The absolute path of the program's base directory.
     """
     if getattr(sys, 'frozen', False):
         # Se stiamo girando come .exe compilato
