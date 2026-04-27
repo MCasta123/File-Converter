@@ -144,7 +144,12 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
             print('----->Premere 1 per qualità alta, compressione bassa')
             print('----->Premere 2 per qualità media, compressione media')
             print('----->Premere 3 per qualità bassa, compressione alta')
-            quality=int(input())
+            while True:
+                try:
+                    quality = int(input())
+                    break  # ← uscita dal loop solo se la conversione è andata a buon fine
+                except ValueError:
+                    print('Inserire un numero valido')
             return {'quality' : quality}
         elif choice==3: #qui non si aggiunge parametri extra ma si usa la funzione per chiamarne un altra senza fare il ciclo for del main
             if file_list:   #serve per quando si passa più file ma se ne vuole solo uno in output, quindi la funzione unisce i file in uno
@@ -518,7 +523,12 @@ class VideoFile(GenericFile):
             print('---->Premere 1 per compressione leggera: ')
             print('---->Premere 2 per compressione media(riduce molto il peso ma qualità accettabile): ')
             print('---->Premere 3 per compressione pesante(qualità bassa): ')
-            quality=int(input())
+            while True:
+                try:
+                    quality = int(input())
+                    break  # ← uscita dal loop solo se la conversione è andata a buon fine
+                except ValueError:
+                    print('Inserire un numero valido')
             return {'quality': quality}
         else:
             return {}
