@@ -31,7 +31,7 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
             '.pdf' : PDFFile,
             '.jpeg' : ImageFile,
             '.png' : ImageFile,
-            '.HEIC' : ImageFile,
+            '.heic' : ImageFile,
             '.jpg' : ImageFile,
             '.mp4' : VideoFile,
             '.mov' : VideoFile
