@@ -26,6 +26,19 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
         self.file_dimension=os.path.getsize(file_path)
 
     @staticmethod
+    def _get_extension_map()-> dict:
+        extension_map={       #mappa per decidere il constructor da chiamare
+            '.pdf' : PDFFile,
+            '.jpeg' : ImageFile,
+            '.png' : ImageFile,
+            '.HEIC' : ImageFile,
+            '.jpg' : ImageFile,
+            '.mp4' : VideoFile,
+            '.mov' : VideoFile
+        }
+        return extension_map
+
+    @staticmethod
     def create_from_path(file_path: str) -> 'GenericFile':
         """
         Factory method that creates the appropriate file object based on the file extension.
@@ -36,6 +49,7 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
         Returns:
             An instance of the appropriate GenericFile subclass.
         """
+        extension_map=GenericFile._get_extension_map()
         extension=Path(file_path).suffix.lower()   #prendo l'extension
         if extension in extension_map:   #controllo se c' è l' extension, con la mappa ricavo il constructor e lo chiamo
             constructor=extension_map[extension]
@@ -624,15 +638,7 @@ class VideoFile(GenericFile):
 
 #VARIABILI GLOBALI
 
-extension_map={       #mappa per decidere il constructor da chiamare
-            '.pdf' : PDFFile,
-            '.jpeg' : ImageFile,
-            '.png' : ImageFile,
-            '.HEIC' : ImageFile,
-            '.jpg' : ImageFile,
-            '.mp4' : VideoFile,
-            '.mov' : VideoFile
-        }
+
 
 #############################################################################################################################
 #############################################################################################################################
@@ -648,6 +654,7 @@ def check_homogeneity(files_paths: list) -> bool:
     Returns:
         True if all files map to the same class, False otherwise.
     """
+    extension_map=GenericFile._get_extension_map()
     extension=Path(files_paths[0]).suffix.lower()
     if extension in extension_map:
         file_type=extension_map[extension]
