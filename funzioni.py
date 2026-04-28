@@ -1,9 +1,12 @@
+import platform
+import os
 import tkinter
 import shutil
 from tkinter import filedialog
-import os
 import glob
 import sys
+import subprocess
+
 
 ################################################################################################################################
 
@@ -15,8 +18,23 @@ def chose_file() -> tuple:
         A tuple of absolute file paths selected by the user.
         Returns an empty tuple if the user cancels.
     """
+    if platform.system() == "Linux":
+        if shutil.which('zenity'):
+            comando = ['zenity', '--file-selection', '--multiple', '--separator=|', '--title=Seleziona i file da convertire']
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+            if risultato.returncode == 0:
+                return tuple(risultato.stdout.strip().split('|'))
+            return ()
+            
+        elif shutil.which('kdialog'):
+            comando = ['kdialog', '--getopenfilename', '.', '--multiple', '--title', 'Seleziona i file da convertire']
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+            if risultato.returncode == 0:
+                # kdialog separa i file con un 'a capo' (newline)
+                return tuple(risultato.stdout.strip().split('\n'))
+            return ()
     root = tkinter.Tk()
-    root.withdraw() #creato finestra e nascosta
+    root.withdraw() 
     root.attributes('-topmost', True)
  #Apri l'Esplora Risorse vero e proprio
     file_path = filedialog.askopenfilenames(
@@ -38,6 +56,24 @@ def save_as(estensione: str) -> str:
     Returns:
         The absolute path chosen by the user, or an empty string if cancelled.
     """
+    if platform.system() == "Linux":
+        if shutil.which('zenity'):
+            comando = ['zenity', '--file-selection', '--save', '--confirm-overwrite', f'--title=Salva come (*{estensione})']
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+            if risultato.returncode == 0:
+                percorso = risultato.stdout.strip()
+                if not percorso.endswith(estensione): percorso += estensione
+                return percorso
+            return ""
+            
+        elif shutil.which('kdialog'):
+            comando = ['kdialog', '--getsavefilename', '.', f'*{estensione}', '--title', 'Salva file convertito come...']
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+            if risultato.returncode == 0:
+                percorso = risultato.stdout.strip()
+                if not percorso.endswith(estensione): percorso += estensione
+                return percorso
+            return ""
     root = tkinter.Tk()
     root.withdraw() #creato finestra e nascosta
     root.attributes('-topmost', True)
@@ -54,6 +90,20 @@ def chose_directory() -> str:
     Returns:
         The absolute path of the chosen directory, or an empty string if cancelled.
     """
+    if platform.system() == "Linux":
+        if shutil.which('zenity'):
+            comando = ['zenity', '--file-selection', '--directory', '--title=Scegli cartella in cui salvare..']
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+            if risultato.returncode == 0:
+                return risultato.stdout.strip()
+            return ""
+            
+        elif shutil.which('kdialog'):
+            comando = ['kdialog', '--getexistingdirectory', '.', '--title', 'Scegli cartella in cui salvare..']
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+            if risultato.returncode == 0:
+                return risultato.stdout.strip()
+            return ""
     root=tkinter.Tk()
     root.withdraw()
     root.attributes('-topmost', True)
