@@ -6,6 +6,7 @@ from abc import ABC, abstractmethod
 import subprocess
 import pikepdf
 from funzioni import save_as, search_executable, get_base_path
+import platform
 
 
 # Inizializza il plugin per leggere i file HEIC (Apple)
@@ -104,14 +105,18 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
         """
         super().__init__(file_path)
         script_directory = get_base_path()
-        percorsi_comuni_gs = [
-            os.path.join(script_directory, "gs", "bin", "gswin64c.exe"),
-
-            r"C:\Program Files\gs\gs*\bin\gswin64c.exe",
-            r"C:\Program Files (x86)\gs\gs*\bin\gswin32c.exe"
-        ]
+        if platform.system() == 'Windows':
+            gs_name = 'gswin64c'
+            gs_fallback_paths = [
+                os.path.join(script_directory, "gs", "bin", "gswin64c.exe"),
+                r"C:\Program Files\gs\gs*\bin\gswin64c.exe",
+                r"C:\Program Files (x86)\gs\gs*\bin\gswin32c.exe"
+            ]
+        else:  # Linux / macOS
+            gs_name = 'gs'
+            gs_fallback_paths = []  # su Linux si trova già nel PATH
         
-        self.gs_exe = search_executable("gswin64c", percorsi_comuni_gs)
+        self.gs_exe = search_executable(gs_name, gs_fallback_paths)
 
     def get_available_actions(self) -> None:
         print('Le azioni disponibili sono: \n')
@@ -185,7 +190,7 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
         print("Conversione a PDF/A-1b")
         
         try:
-            with pikepdf.open(self.path,'r') as pdf:
+            with pikepdf.open(self.path) as pdf:
                 # Aggiungi metadati XMP per PDF/A-1b
                 with pdf.open_metadata(set_pikepdf_as_editor=False) as meta:
                     meta['pdfaid:part'] = '1'
@@ -488,12 +493,15 @@ class VideoFile(GenericFile):
         super().__init__(file_path)
         script_directory = get_base_path() 
         
-        percorsi_comuni_ffmpeg = [
-            os.path.join(script_directory, "ffmpeg.exe"), 
-            r"C:\ffmpeg\bin\ffmpeg.exe",
-            r"C:\Program Files\ffmpeg\bin\ffmpeg.exe"
-        ]
-        self.ffmpeg_exe = search_executable("ffmpeg", percorsi_comuni_ffmpeg)
+        if platform.system() == 'Windows':
+            ffmpeg_fallback_paths = [
+                os.path.join(script_directory, "ffmpeg.exe"),
+                r"C:\ffmpeg\bin\ffmpeg.exe",
+                r"C:\Program Files\ffmpeg\bin\ffmpeg.exe"
+            ]
+        else:
+            ffmpeg_fallback_paths = []
+        self.ffmpeg_exe = search_executable("ffmpeg", ffmpeg_fallback_paths)
         
     def choose_action(self, choice: int, directory_path: str, extra_parameters: dict | None = None) -> None:
         if extra_parameters is None:
