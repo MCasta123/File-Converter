@@ -32,7 +32,7 @@ Un'applicazione desktop basata su Python per la gestione e conversione di file P
 
 -Per eseguire il codice sorgente, è necessario installare le seguenti librerie:
 
-pip install pillow pikepdf
+pip install pillow pikepdf pillow_heif
 
 Il progetto si appoggia ai seguenti motori esterni motori esterni per l'elaborazione dei media.
 
