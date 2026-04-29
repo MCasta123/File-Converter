@@ -25,56 +25,55 @@ Applicazione desktop basata su Python progettata per la gestione e la conversion
 ## Utilizzo
 
 ### Utenti finali — Windows
-Scaricare l'eseguibile dalla sezione **Releases** della repository. Nessuna installazione aggiuntiva richiesta — GhostScript e FFmpeg sono già inclusi nel pacchetto.
 
-### Utenti finali — Linux
-Su Linux non è disponibile un eseguibile precompilato. Seguire le istruzioni nella sezione [Installazione per sviluppatori](#installazione-per-sviluppatori) qui sotto.
+Scaricare l'eseguibile dalla sezione **Releases** della repository. Nessuna installazione aggiuntiva richiesta — GhostScript e FFmpeg sono già inclusi nel pacchetto. Avviare direttamente il file `.exe`.
 
 ---
 
-## Installazione per sviluppatori
+### Utenti finali — Linux
 
-Questa sezione è rivolta a chi vuole eseguire o modificare il codice sorgente direttamente.
+Su Linux non è disponibile un eseguibile precompilato. È necessario eseguire il programma tramite Python, ma non sono richieste conoscenze tecniche particolari — seguire i passi qui sotto.
 
-### 1. Dipendenze Python
+**1. Installare Python 3.11 o superiore** (se non già presente):
 
-Installare le librerie necessarie tramite pip:
+```bash
+# Ubuntu / Debian
+sudo apt install python3 python3-pip
+
+# Fedora
+sudo dnf install python3 python3-pip
+```
+
+**2. Installare le dipendenze Python:**
 
 ```bash
 pip install pillow pikepdf pillow-heif
 ```
 
-### 2. Motori esterni
+**3. Installare GhostScript, FFmpeg e Zenity:**
 
-Il programma si affida a **GhostScript** per la gestione dei PDF e **FFmpeg** per l'elaborazione dei video. Su Linux vanno installati tramite il gestore pacchetti di sistema.
-
-#### Ubuntu / Debian e derivate
-
+Ubuntu / Debian e derivate:
 ```bash
 sudo apt update
 sudo apt install ffmpeg ghostscript zenity
 ```
 
-#### Fedora e derivate
-
+Fedora e derivate:
 ```bash
 sudo dnf install ghostscript zenity
 ```
 
-Per FFmpeg su Fedora è necessario abilitare i repository **RPM Fusion**, in quanto la versione `ffmpeg-free` inclusa nei repo ufficiali non include i codec H.264 necessari:
+> **Nota per utenti Fedora:** La versione `ffmpeg-free` inclusa nei repository ufficiali non include i codec H.264 necessari. È necessario installare FFmpeg dai repository RPM Fusion:
+> ```bash
+> sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+> sudo dnf install ffmpeg
+> ```
+> Per verificare che i codec siano stati installati correttamente:
+> ```bash
+> ffmpeg -encoders | grep libx264
+> ```
 
-```bash
-sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
-sudo dnf install ffmpeg
-```
-
-Per verificare che i codec siano stati installati correttamente:
-
-```bash
-ffmpeg -encoders | grep libx264
-```
-
-### 3. Avvio
+**4. Avviare il programma:**
 
 ```bash
 python main.py
@@ -82,23 +81,46 @@ python main.py
 
 ---
 
-## Compilazione dell'eseguibile (Windows)
+### Sviluppatori — Windows e Linux
 
-Per generare il file `.exe` distribuibile è necessario avere installato **PyInstaller**:
+Questa sezione è rivolta a chi vuole modificare o estendere il codice sorgente, o compilare l'eseguibile Windows.
+
+**1. Clonare la repository:**
 
 ```bash
-pip install pyinstaller
+git clone <url_repository>
+cd <nome_cartella>
 ```
 
-Prima di compilare, assicurarsi che nella cartella del progetto siano presenti:
-- La cartella `gs/` contenente GhostScript (percorso atteso: `gs/bin/gswin64c.exe`)
-- Il file `ffmpeg.exe` nella cartella principale del progetto
-
-GhostScript per Windows può essere scaricato da [Ghostscript Downloads](https://www.ghostscript.com/releases/gsdnld.html).
-FFmpeg per Windows può essere scaricato da [FFmpeg.org](https://ffmpeg.org/download.html).
-
-Per compilare:
+**2. Installare le dipendenze Python:**
 
 ```bash
-pyinstaller --onedir main.py
+pip install pillow pikepdf pillow-heif pyinstaller
+```
+
+**3. Installare GhostScript e FFmpeg:**
+
+Su **Linux** seguire le stesse istruzioni della sezione utenti finali Linux qui sopra.
+
+Su **Windows** i due eseguibili devono essere posizionati manualmente nella cartella del progetto con la seguente struttura:
+
+```
+progetto/
+├── main.py
+├── classi.py
+├── funzioni.py
+├── config.toml
+├── ffmpeg.exe                  ← file eseguibile FFmpeg
+└── gs/
+    └── bin/
+        └── gswin64c.exe        ← file eseguibile GhostScript
+```
+
+- GhostScript per Windows: [Ghostscript Downloads](https://www.ghostscript.com/releases/gsdnld.html)
+- FFmpeg per Windows: [FFmpeg.org](https://ffmpeg.org/download.html)
+
+**4. Avviare il programma in modalità sviluppo:**
+
+```bash
+python main.py
 ```
