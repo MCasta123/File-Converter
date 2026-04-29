@@ -563,9 +563,10 @@ class VideoFile(GenericFile):
         if directory_path=='': #un file solo
             output_path = save_as(".mp4")
         else:   #gestione di più file
+            suffix=self.config['output_suffixes']['converted_mp4']
             file_name=os.path.basename(self.path)
             file_name_without_extension=os.path.splitext(file_name)[0]
-            new_name=file_name_without_extension+'_convertitoInmp4.mp4'
+            new_name=file_name_without_extension+suffix+'.mp4'
             output_path=os.path.join(directory_path,new_name)
         
         if not output_path:
@@ -574,12 +575,14 @@ class VideoFile(GenericFile):
 
         try:
             print(f'Avvio conversione di {os.path.basename(self.path)}...')
+            codec_video=self.config['video']['codec_video']
+            codec_audio=self.config['video']['codec_audio']
             command = [
                 self.ffmpeg_exe,
                 '-y',             
                 '-i', self.path,
-                '-c:v', 'libx264', 
-                '-c:a', 'aac',     
+                '-c:v', codec_video, 
+                '-c:a', codec_audio,     
                 '-strict', 'experimental', 
                 output_path]
             
@@ -607,19 +610,23 @@ class VideoFile(GenericFile):
             FileNotFoundError: If the ffmpeg executable is not found.
             OSError: If the output file cannot be written or read.
         """
+        crf_low=self.config['video']['crf_low']
+        crf_medium=self.config['video']['crf_medium']
+        crf_high=self.config['video']['crf_high']
         quality_map={
-            1 : '23',
-            2 : '28',
-            3 : '35'
+            1 : crf_low,
+            2 : crf_medium,
+            3 : crf_high
         }
         if quality in quality_map:
             extension=Path(self.path).suffix.lower()
             if directory_path=='': #un file solo
                 output_path = save_as(extension)
             else:   #gestione di più file
+                suffix=self.config['output_suffixes']['compressed']
                 file_name=os.path.basename(self.path)
                 file_name_without_extension=os.path.splitext(file_name)[0]
-                new_name=file_name_without_extension+'_compresso'+extension
+                new_name=file_name_without_extension+suffix+extension
                 output_path=os.path.join(directory_path,new_name)
             
             if not output_path:
@@ -629,21 +636,26 @@ class VideoFile(GenericFile):
 
             try:
                 print(f'Avvio compressione di {os.path.basename(self.path)}...')
+                codec_video=self.config['video']['codec_video']
+                codec_audio=self.config['video']['codec_audio']
+                preset=self.config['video']['preset']
+                audio_bitrate=self.config['video']['audio_bitrate']
                 command = [
                     self.ffmpeg_exe,
                     '-y',                
                     '-i', self.path, 
-                    '-c:v', 'libx264',  
+                    '-c:v', codec_video,  
                     '-crf', chosen_crf, 
-                    '-preset', 'fast', 
-                    '-c:a', 'aac',       
-                    '-b:a', '128k',      
+                    '-preset', preset, 
+                    '-c:a', codec_audio,       
+                    '-b:a', audio_bitrate,      
                     output_path          
                 ]
                 flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0 #check if os=windows if true don't show the terminal when subprocess is called
                 subprocess.run(command, check=True, capture_output=True, text=True, creationflags=flags)
-                print(f'Il file {os.path.basename(self.path)} prima pesava: {(os.path.getsize(self.path)/1048576):.3f} MB')
-                print(f'Il file compresso {os.path.basename(output_path)} adesso pesa: {(os.path.getsize(output_path)/1048576):.3f} MB')
+                bytes_per_mb=self.config['constants']['bytes_per_mb']
+                print(f'Il file {os.path.basename(self.path)} prima pesava: {(os.path.getsize(self.path)/bytes_per_mb):.3f} MB')
+                print(f'Il file compresso {os.path.basename(output_path)} adesso pesa: {(os.path.getsize(output_path)/bytes_per_mb):.3f} MB')
             
             except subprocess.CalledProcessError as e:
                     print(f'Errore ffmpeg : {e}')
@@ -659,13 +671,6 @@ class VideoFile(GenericFile):
 #############################################################################################################################
 #############################################################################################################################
 
-#VARIABILI GLOBALI
-
-
-
-#############################################################################################################################
-#############################################################################################################################
-#############################################################################################################################
 
 def check_homogeneity(files_paths: tuple[str, ...]) -> bool:
     """
