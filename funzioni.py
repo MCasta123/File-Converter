@@ -10,7 +10,7 @@ import subprocess
 
 ################################################################################################################################
 
-def chose_file() -> tuple:
+def chose_file() -> tuple | str:
     """
     Opens a file dialog to select one or more files.
 
@@ -113,53 +113,7 @@ def chose_directory() -> str:
 
 #######################################################################################################################################
 
-def search_executable(executable_name: str, pattern_windows_fallback: list | None = None) -> str:
-    """
-    Searches for an executable in the system in the following order:
-    1. System PATH
-    2. Common Windows paths (fallback patterns)
-    3. Manual selection via file dialog
 
-    Args:
-        executable_name: Name of the executable to search for (e.g. 'ffmpeg').
-        pattern_windows_fallback: List of glob patterns to try on Windows if PATH search fails.
-
-    Returns:
-        The absolute path to the found executable.
-
-    Raises:
-        FileNotFoundError: If the executable cannot be found and the user cancels the manual selection.
-    """
-   
-    str_executable_name = str(executable_name)
-
-    path = shutil.which(str_executable_name)
-    if path:
-        return path
-        
-    if os.name == 'nt' and pattern_windows_fallback:
-        for pattern in pattern_windows_fallback:
-            results = glob.glob(pattern)
-            if results:
-                return results[0] # Ritorna il primo trovato
-                
-    #Chiediamo all'utente
-    print(f"\n[!] Non riesco a trovare l'eseguibile: {str_executable_name}")
-    print("Selezionalo manualmente dalla finestra che sta per aprirsi...")
-    
-    root = tkinter.Tk()
-    root.withdraw()
-    root.attributes('-topmost', True)
-    manual_path = filedialog.askopenfilename(
-        title=f"Trova {str_executable_name}",
-        filetypes=[("Eseguibili", "*.exe")] if os.name == 'nt' else [("Tutti i file", "*.*")]
-    )
-    root.destroy()
-    
-    if manual_path:
-        return manual_path
-    else:
-        raise FileNotFoundError(f"L'eseguibile {str_executable_name} è strettamente necessario per continuare.")
     
 #######################################################################################################################################
 

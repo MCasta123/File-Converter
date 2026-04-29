@@ -5,7 +5,7 @@ from pathlib import Path  #libreria importata per estrarre facilmente l' extensi
 from abc import ABC, abstractmethod
 import subprocess
 import pikepdf
-from funzioni import save_as, search_executable, get_base_path
+from funzioni import save_as, get_base_path
 import platform
 
 
@@ -17,16 +17,18 @@ register_heif_opener()
 #############################################################################################################################
 
 class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa nel main bisogna chimare solo il metodo statico
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: str, config: dict) -> None:
         """
         Initializes the generic file object with basic file metadata.
 
         Args:
             file_path: Absolute path to the file.
+            config: Configuration dictionary.
         """
         self.path=file_path
         self.name=os.path.basename(file_path)
         self.file_dimension=os.path.getsize(file_path)
+        self.config=config
 
     @staticmethod
     def _get_extension_map()-> dict:
@@ -42,12 +44,13 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
         return extension_map
 
     @staticmethod
-    def create_from_path(file_path: str) -> 'GenericFile':
+    def create_from_path(file_path: str, config: dict) -> 'GenericFile':
         """
         Factory method that creates the appropriate file object based on the file extension.
 
         Args:
             file_path: Absolute path to the file.
+            config: Configuration dictionary.
 
         Returns:
             An instance of the appropriate GenericFile subclass.
@@ -56,7 +59,7 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
         extension=Path(file_path).suffix.lower()   #prendo l'extension
         if extension in extension_map:   #controllo se c' è l' extension, con la mappa ricavo il constructor e lo chiamo
             constructor=extension_map[extension]
-            return constructor(file_path)
+            return constructor(file_path, config)
         else:
             raise ValueError(f'Unsupported file extension: {extension}')
 
@@ -96,27 +99,19 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
 #############################################################################################################################
 
 class PDFFile(GenericFile):        #classe che gestisce i file pdf
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: str, config: dict) -> None:
         """
         Initializes the PDFFile object and locates the GhostScript executable.
 
         Args:
             file_path: Absolute path to the PDF file.
+            config: Configuration dictionary.
         """
-        super().__init__(file_path)
-        script_directory = get_base_path()
+        super().__init__(file_path, config)
         if platform.system() == 'Windows':
-            gs_name = 'gswin64c'
-            gs_fallback_paths = [
-                os.path.join(script_directory, "gs", "bin", "gswin64c.exe"),
-                r"C:\Program Files\gs\gs*\bin\gswin64c.exe",
-                r"C:\Program Files (x86)\gs\gs*\bin\gswin32c.exe"
-            ]
-        else:  # Linux / macOS
-            gs_name = 'gs'
-            gs_fallback_paths = []  # su Linux si trova già nel PATH
-        
-        self.gs_exe = search_executable(gs_name, gs_fallback_paths)
+            self.gs_exe = os.path.join(get_base_path(), "gs", "bin", "gswin64c.exe")
+        else:
+            self.gs_exe = "gs"  # trovato nel PATH di sistema)
 
     def get_available_actions(self) -> None:
         print('Le azioni disponibili sono: \n')
@@ -320,14 +315,15 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
 #######################################################################################################################
 
 class ImageFile(GenericFile):
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: str, config: dict) -> None:
         """
         Initializes the ImageFile object.
 
         Args:
             file_path: Absolute path to the image file.
+            config: Configuration dictionary.
         """
-        super().__init__(file_path)
+        super().__init__(file_path, config)
 
     def get_available_actions(self) -> None:
         print('Le azioni disponibili sono: \n')
@@ -483,25 +479,19 @@ class ImageFile(GenericFile):
 #############################################################################################################################
 
 class VideoFile(GenericFile):
-    def __init__(self, file_path: str) -> None:
+    def __init__(self, file_path: str, config: dict) -> None:
         """
         Initializes the VideoFile object and locates the ffmpeg executable.
 
         Args:
             file_path: Absolute path to the video file.
+            config: Configuration dictionary.
         """
-        super().__init__(file_path)
-        script_directory = get_base_path() 
-        
+        super().__init__(file_path, config)
         if platform.system() == 'Windows':
-            ffmpeg_fallback_paths = [
-                os.path.join(script_directory, "ffmpeg.exe"),
-                r"C:\ffmpeg\bin\ffmpeg.exe",
-                r"C:\Program Files\ffmpeg\bin\ffmpeg.exe"
-            ]
+            self.ffmpeg_exe = os.path.join(get_base_path(), "ffmpeg.exe")
         else:
-            ffmpeg_fallback_paths = []
-        self.ffmpeg_exe = search_executable("ffmpeg", ffmpeg_fallback_paths)
+            self.ffmpeg_exe = "ffmpeg"  # trovato nel PATH di sistema
         
     def choose_action(self, choice: int, directory_path: str, extra_parameters: dict | None = None) -> None:
         if extra_parameters is None:
@@ -667,7 +657,7 @@ class VideoFile(GenericFile):
 #############################################################################################################################
 #############################################################################################################################
 
-def check_homogeneity(files_paths: list) -> bool:
+def check_homogeneity(files_paths: tuple[str, ...]) -> bool:
     """
     Checks that all selected files belong to the same supported file type.
 

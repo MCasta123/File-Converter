@@ -1,15 +1,17 @@
 from funzioni import chose_directory,chose_file
 from classi import GenericFile, check_homogeneity
 import traceback
+import tomllib
 
-
+with open('config.toml', 'rb') as f:
+    config = tomllib.load(f)
 while True: #LOOP CHE FA CCONTINUARE IL PROGRAMMA
     
     files_paths=chose_file()   #permetto di scegliere uno o più file
     if files_paths:    #controllo che non sia vuota la tupla
         if check_homogeneity(files_paths):   #controllo che tutti i file siano relativi alla stessa classe
             try:
-                temp_object=GenericFile.create_from_path(files_paths[0])
+                temp_object=GenericFile.create_from_path(files_paths[0],config=config)  #creo un oggetto temporaneo per poter accedere alle azioni disponibili
                 temp_object.get_available_actions()
             except ValueError as e:
                 print(f'ERRORE : {e}')
@@ -32,7 +34,7 @@ while True: #LOOP CHE FA CCONTINUARE IL PROGRAMMA
                                 continue
                     
                     for x in files_paths:
-                        chosen_file=GenericFile.create_from_path(x)
+                        chosen_file=GenericFile.create_from_path(x, config=config)
                         chosen_file.choose_action(choice=choice,directory_path=directory_path,extra_parameters=extra_parameters)
 
             except ValueError:
