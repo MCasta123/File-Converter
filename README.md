@@ -125,29 +125,3 @@ progetto/
 python main.py
 ```
 
-**5. Compilare l'eseguibile Windows (opzionale):**
-
-Assicurarsi di essere su Windows e che gli eseguibili GhostScript e FFmpeg siano già nella cartella del progetto come indicato sopra.
-
-PyInstaller non include automaticamente file esterni come GhostScript e FFmpeg — vanno specificati esplicitamente con il flag `--add-data`:
-
-```bash
-pyinstaller --onedir --add-data "gs;gs" --add-data "ffmpeg.exe;." main.py
-```
-
-Dove:
-- `"gs;gs"` include la cartella `gs/` nel pacchetto mantenendo la stessa struttura
-- `"ffmpeg.exe;."` include `ffmpeg.exe` nella cartella principale del pacchetto
-
-L'eseguibile compilato si troverà nella cartella `dist/main/`. La struttura finale del pacchetto distribuibile sarà:
-
-```
-dist/main/
-├── main.exe
-├── ffmpeg.exe
-└── gs/
-    └── bin/
-        └── gswin64c.exe
-```
-
-> **Nota:** Il flag `--add-data` usa `;` come separatore su Windows. Su Linux il separatore è `:`, ma su Linux non è necessario includere GhostScript e FFmpeg poiché vengono usati quelli installati nel sistema.
