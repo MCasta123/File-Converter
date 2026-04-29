@@ -2,7 +2,9 @@
 
 Applicazione desktop basata su Python progettata per la gestione e la conversione di file PDF, immagini e video. Il software è compatibile con Windows e Linux e adatta automaticamente la propria interfaccia e i motori di elaborazione in base al sistema operativo rilevato.
 
-### Funzionalità
+---
+
+## Funzionalità
 
 **PDF**
 - Conversione in formato PDF/A-1b (standard per l'archiviazione a lungo termine).
@@ -20,46 +22,83 @@ Applicazione desktop basata su Python progettata per la gestione e la conversion
 
 ---
 
-### Requisiti Tecnici
+## Utilizzo
 
-#### Dipendenze Python
-Per eseguire il codice sorgente è necessario installare le seguenti librerie tramite terminale:
+### Utenti finali — Windows
+Scaricare l'eseguibile dalla sezione **Releases** della repository. Nessuna installazione aggiuntiva richiesta — GhostScript e FFmpeg sono già inclusi nel pacchetto.
 
+### Utenti finali — Linux
+Su Linux non è disponibile un eseguibile precompilato. Seguire le istruzioni nella sezione [Installazione per sviluppatori](#installazione-per-sviluppatori) qui sotto.
+
+---
+
+## Installazione per sviluppatori
+
+Questa sezione è rivolta a chi vuole eseguire o modificare il codice sorgente direttamente.
+
+### 1. Dipendenze Python
+
+Installare le librerie necessarie tramite pip:
+
+```bash
 pip install pillow pikepdf pillow-heif
+```
 
-#### Motori esterni
+### 2. Motori esterni
 
-Il programma utilizza Ghostscript per la gestione dei PDF e FFmpeg per l'elaborazione dei video. L'installazione dipende dal sistema operativo in uso.
+Il programma si affida a **GhostScript** per la gestione dei PDF e **FFmpeg** per l'elaborazione dei video. Su Linux vanno installati tramite il gestore pacchetti di sistema.
 
-###### - Sistemi Windows
+#### Ubuntu / Debian e derivate
 
-Il software cerca gli esegubili all'interno della cartella del progetto o nei percorsi di sistema predefiniti:
-
-Ghostscript: Scaricare l'eseguibile da Ghostscript Downloads. Inserire la cartella di installazione nella directory principale del progetto rinominandola in "gs" (il percorso atteso è gs/bin/gswin64c.exe).
-
-FFmpeg: Scaricare l'eseguibile da FFmpeg.org e inserire il file ffmpeg.exe direttamente nella cartella principale del progetto.
-
-###### - Sistemi Linux (Fedora, Ubuntu, Debian e derivate)
-
- Non è necessario scaricare manualmente gli eseguibili, ma vanno installati tramite il gestore pacchetti:
-
-Per distribuzioni basate su Debian/Ubuntu:
-
+```bash
 sudo apt update
 sudo apt install ffmpeg ghostscript zenity
+```
 
-Per distribuzioni basate su Fedora:
+#### Fedora e derivate
 
-sudo dnf install ffmpeg ghostscript zenity
+```bash
+sudo dnf install ghostscript zenity
+```
 
-Nota per utenti Fedora: Per la compressione e conversione video, è necessario installare la versione completa di FFmpeg dai repository RPM Fusion. La versione "ffmpeg-free" preinstallata non include i codec H.264 necessari per il funzionamento dell'applicazione.
+Per FFmpeg su Fedora è necessario abilitare i repository **RPM Fusion**, in quanto la versione `ffmpeg-free` inclusa nei repo ufficiali non include i codec H.264 necessari:
 
-Utilizzo
-L'applicazione può essere avviata tramite lo script principale:
+```bash
+sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+sudo dnf install ffmpeg
+```
 
+Per verificare che i codec siano stati installati correttamente:
 
+```bash
+ffmpeg -encoders | grep libx264
+```
+
+### 3. Avvio
+
+```bash
 python main.py
+```
 
+---
 
+## Compilazione dell'eseguibile (Windows)
 
-Per quanto riguarda i requisiti video su Fedora, se dovessi avere ancora problemi con i codec dopo il cambio di repository, puoi verificare che i pacchetti necessari siano attivi con il comando `ffmpeg -encoders | grep libx264` nel terminale.
+Per generare il file `.exe` distribuibile è necessario avere installato **PyInstaller**:
+
+```bash
+pip install pyinstaller
+```
+
+Prima di compilare, assicurarsi che nella cartella del progetto siano presenti:
+- La cartella `gs/` contenente GhostScript (percorso atteso: `gs/bin/gswin64c.exe`)
+- Il file `ffmpeg.exe` nella cartella principale del progetto
+
+GhostScript per Windows può essere scaricato da [Ghostscript Downloads](https://www.ghostscript.com/releases/gsdnld.html).
+FFmpeg per Windows può essere scaricato da [FFmpeg.org](https://ffmpeg.org/download.html).
+
+Per compilare:
+
+```bash
+pyinstaller --onedir main.py
+```
