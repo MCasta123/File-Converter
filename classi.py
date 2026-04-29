@@ -174,9 +174,10 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
         if directory_path=='': #un file solo
             output_path = save_as(".pdf")
         else:   #gestione di più file
+            suffix=self.config['output_suffixes']['pdfa']
             file_name=os.path.basename(self.path)
             file_name_without_extension=os.path.splitext(file_name)[0]
-            new_name=file_name_without_extension+'_convertitoInPDFA.pdf'
+            new_name=file_name_without_extension+suffix
             output_path=os.path.join(directory_path,new_name)
         
         if not output_path:
@@ -233,18 +234,20 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
             if directory_path=='': #un file solo
                 output_path = save_as(".pdf")
             else:   #gestione di più file
+             suffix=self.config['output_suffixes']['compressed']
              file_name=os.path.basename(self.path)
              file_name_without_extension=os.path.splitext(file_name)[0]
-             new_name=file_name_without_extension+'_compresso.pdf'
+             new_name=file_name_without_extension+suffix
              output_path=os.path.join(directory_path,new_name)
         
             if not output_path:
                 return
             try:
+                compatibility_level= self.config['pdf']['compatibility_level']
                 command=[
                     self.gs_exe,
                     '-sDEVICE=pdfwrite',
-                    '-dCompatibilityLevel=1.4',
+                    f'-dCompatibilityLevel={compatibility_level}',
                     f'-dPDFSETTINGS={quality_map[quality]}',
                     '-dNOPAUSE',
                     '-dQUIET',
@@ -253,8 +256,9 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
                     self.path]
                 flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0 #check if os=windows if true don't show the terminal when subprocess is called
                 subprocess.run(command, check=True, capture_output=True, text=True, creationflags=flags)
-                print(f'Il file {os.path.basename(self.path)} prima pesava: {(os.path.getsize(self.path)/1048576):.3f} MB')
-                print(f'Il file convertito {os.path.basename(output_path)} adesso pesa: {(os.path.getsize(output_path)/1048576):.3f} MB')
+                bytes_per_mb=self.config['constants']['bytes_per_mb']
+                print(f'Il file {os.path.basename(self.path)} prima pesava: {(os.path.getsize(self.path)/bytes_per_mb):.3f} MB')
+                print(f'Il file convertito {os.path.basename(output_path)} adesso pesa: {(os.path.getsize(output_path)/bytes_per_mb):.3f} MB')
             except subprocess.CalledProcessError as e:
                 print(f'Errore ghostscript : {e}')
             except FileNotFoundError as e:
