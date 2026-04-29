@@ -418,9 +418,10 @@ class ImageFile(GenericFile):
         if directory_path=='': #un file solo
             output_path = save_as(extension)
         else:   #gestione di più file
+            suffix=self.config['output_suffixes']['compressed']
             file_name=os.path.basename(self.path)
             file_name_without_extension=os.path.splitext(file_name)[0]
-            new_name=file_name_without_extension+'_compresso'+extension
+            new_name=file_name_without_extension+suffix+extension
             output_path=os.path.join(directory_path,new_name)
         if not output_path:
             return
@@ -429,12 +430,14 @@ class ImageFile(GenericFile):
                 with Image.open(self.path) as img:
                     if img.mode != "RGB":
                         img = img.convert("RGB")
-                    img.save(output_path, "JPEG", optimize=True, quality=80)
+                    quality=self.config['image']['compression_quality']
+                    img.save(output_path, "JPEG", optimize=True, quality=quality)
             else:
                 with Image.open(self.path) as img:
                     img.save(output_path, optimize=True)
-            print(f'Il file {os.path.basename(self.path)} prima pesava: {(os.path.getsize(self.path)/1048576):.3f} MB')
-            print(f'Il file convertito {os.path.basename(output_path)} adesso pesa: {(os.path.getsize(output_path)/1048576):.3f} MB')
+            bytes_per_mb=self.config['constants']['bytes_per_mb']
+            print(f'Il file {os.path.basename(self.path)} prima pesava: {(os.path.getsize(self.path)/bytes_per_mb):.3f} MB')
+            print(f'Il file convertito {os.path.basename(output_path)} adesso pesa: {(os.path.getsize(output_path)/bytes_per_mb):.3f} MB')
         except UnidentifiedImageError as e:
             print(f'Errore nell\' apertura dell\'immagine : {e}')
         except OSError as e:
@@ -459,9 +462,10 @@ class ImageFile(GenericFile):
         if directory_path=='': #un file solo
             output_path = save_as(".jpg")
         else:   #gestione di più file
+            suffix=self.config['output_suffixes']['converted_jpg']
             file_name=os.path.basename(self.path)
             file_name_without_extension=os.path.splitext(file_name)[0]
-            new_name=file_name_without_extension+'_convertitoInJPG.jpg'
+            new_name=file_name_without_extension+suffix+'.jpg'
             output_path=os.path.join(directory_path,new_name)
         
         if not output_path:
@@ -471,7 +475,9 @@ class ImageFile(GenericFile):
             with Image.open(self.path) as im:
                 if im.mode in ("RGBA", "P"):
                     im = im.convert("RGB")
-                im.save(output_path, "JPEG", quality=100, subsampling=0)
+                quality=self.config['image']['jpeg_quality']
+                subsampling=self.config['image']['jpeg_subsampling']
+                im.save(output_path, "JPEG", quality=quality, subsampling=subsampling)
             print(f'Il file {os.path.basename(self.path)} è stato convertito correttamente in jpg')
         except UnidentifiedImageError as e:
             print(f'Errore nell\' apertura dell\'immagine : {e}')
