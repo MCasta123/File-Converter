@@ -1,9 +1,10 @@
-from funzioni import chose_directory,chose_file, get_base_path
+from funzioni import chose_directory,chose_file, get_base_path, load_settings
 from classi import GenericFile, check_homogeneity
 import traceback
 import tomllib
 import sys
 import os
+
 
 try:
     config_path=os.path.join(get_base_path(),'config.toml') #ricavo il percorso del file config.toml
@@ -72,3 +73,4 @@ while True: #LOOP CHE FA CCONTINUARE IL PROGRAMMA
         if retry!='':
             break
     #############################################################
+    

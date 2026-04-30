@@ -5,6 +5,7 @@ import shutil
 from tkinter import filedialog
 import sys
 import subprocess
+import tomllib
 
 
 ################################################################################################################################
@@ -130,3 +131,57 @@ def get_base_path() -> str:
     else:
         # Se stiamo girando come normale script .py
         return os.path.dirname(os.path.abspath(__file__))
+    
+def load_settings() -> dict :
+    """
+    Creates the preferences.toml file if it doesn't exist,
+    if it exist he loads it
+    
+    Returns:
+        Dictionary with the user preferences
+    """
+    directory_path=get_base_path()
+    preferences_path=os.path.join(directory_path,'preferences.toml')
+    
+    
+    if os.path.exists(preferences_path):    #file già creato
+        try:
+            with open(preferences_path,'rb') as f:
+                preferences=tomllib.load(f)
+                print('già  creato')
+        except tomllib.TOMLDecodeError as e:
+            print(f'Errore: preferences.toml non è valido: {e}')
+            sys.exit(1)
+    
+    else:   #si crea il file
+        settings="""
+        #impostazioni
+        [pdf]
+        compression_quality=""
+        
+        [image]
+        compression_quality=""
+        
+        [video]
+        compression_quality=""
+        
+        [general]
+        after_conversion=""
+        """
+        with open(preferences_path,'w') as f:
+            f.write(settings)
+            
+        try:
+            with open(preferences_path,'rb') as f:
+                preferences=tomllib.load(f)
+                print('creato')
+        except tomllib.TOMLDecodeError as e:
+            print(f'Errore: preferences.toml non è valido: {e}')
+            sys.exit(1)
+        
+        return preferences    
+            
+    
+    
+    
+    
