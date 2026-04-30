@@ -157,6 +157,8 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
             if file_list:   #serve per quando si passa più file ma se ne vuole solo uno in output, quindi la funzione unisce i file in uno
                 self._merge_PDF(file_list)
                 return {'stop' : True}
+            print('Seleziona più PDF da unire')    #se si entra qui vuol dire che l'utente ha selezionato un solo pdf e ha chiamato la funzione merge
+            return {'stop' : True}  #quindi stampo errore e fermo l'esecuzione
         else:
             return {}
 
