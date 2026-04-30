@@ -13,9 +13,6 @@ while True: #LOOP CHE FA CCONTINUARE IL PROGRAMMA
             try:
                 temp_object=GenericFile.create_from_path(files_paths[0],config=config)  #creo un oggetto temporaneo per poter accedere alle azioni disponibili
                 temp_object.get_available_actions()
-            except ValueError as e:
-                print(f'ERRORE : {e}')
-            try:
                 choice=int(input())
                 directory_path=''
                 extra_parameters=temp_object.add_extra_parameters(choice=choice,file_list=files_paths)
