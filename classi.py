@@ -376,13 +376,13 @@ class ImageFile(GenericFile):
             file_list=[]
         if file_list:
             output_path = save_as('.pdf')
+            other_immage=[]
             if not output_path:
                 return
             try:
                 img1=Image.open(file_list[0])
                 if img1.mode!='RGB':
                     img1=img1.convert('RGB')
-                other_immage=[]
                 for immage in file_list[1:]:
                     img_temp=Image.open(immage)
                     if img_temp.mode!='RGB':
