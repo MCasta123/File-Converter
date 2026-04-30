@@ -700,7 +700,7 @@ def check_homogeneity(files_paths: tuple[str, ...]) -> bool:
     else:
         return False
     homogeneity=True
-    for x in files_paths:
+    for x in files_paths[1:]: #salto il primo file, controllarlo con se stesso non avrebbe senso
         ext=Path(x).suffix.lower()
         if ext in extension_map:
             type_X=extension_map[ext]
