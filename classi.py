@@ -364,6 +364,8 @@ class ImageFile(GenericFile):
                
                 self._convert_to_PDF(file_list)
                 return {'stop' : True}
+            print('Nessun file selezionato')
+            return {'stop' : True}
         else:
             return {}
 
