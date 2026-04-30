@@ -178,4 +178,8 @@ poetry.toml
 # LSP config files
 pyrightconfig.json
 
+#extension code runner
 tempCodeRunnerFile.py
+
+#configuration files
+preferences.toml
