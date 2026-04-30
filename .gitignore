@@ -1,4 +1,4 @@
-
+.vscode
 ### Python ###
 mainGrafico.py
 #immagine di copertina
@@ -177,3 +177,5 @@ poetry.toml
 
 # LSP config files
 pyrightconfig.json
+
+tempCodeRunnerFile.py

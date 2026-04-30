@@ -1,90 +1,128 @@
+import platform
+import os
 import tkinter
 import shutil
 from tkinter import filedialog
-import os
-import glob
 import sys
+import subprocess
+
 
 ################################################################################################################################
 
-def scegliFile():
+def chose_file() -> tuple | str:
+    """
+    Opens a file dialog to select one or more files.
+
+    Returns:
+        A tuple of absolute file paths selected by the user.
+        Returns an empty tuple if the user cancels.
+    """
+    if platform.system() == "Linux":
+        if shutil.which('zenity'):
+            comando = ['zenity', '--file-selection', '--multiple', '--separator=|', '--title=Seleziona i file da convertire']
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+            if risultato.returncode == 0:
+                return tuple(risultato.stdout.strip().split('|'))
+            return ()
+            
+        elif shutil.which('kdialog'):
+            comando = ['kdialog', '--getopenfilename', '.', '--multiple', '--title', 'Seleziona i file da convertire']
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+            if risultato.returncode == 0:
+                # kdialog separa i file con un 'a capo' (newline)
+                return tuple(risultato.stdout.strip().split('\n'))
+            return ()
     root = tkinter.Tk()
-    root.withdraw() #creato finestra e nascosta
+    root.withdraw() 
     root.attributes('-topmost', True)
  #Apri l'Esplora Risorse vero e proprio
-    percorso_file = filedialog.askopenfilenames(
+    file_path = filedialog.askopenfilenames(
         title="Seleziona i file da convertire",
         filetypes=[("TUTTI I FILE","*.*"),("PDF", "*.pdf"),("IMMAGINI","*.jpg *.jpeg *.png *.HEIC"),("VIDEO","*.mp4 *.mov")]
     )
     root.destroy()  #distruggo finestra
-    return percorso_file
+    return file_path
 
 #####################################################################################################################################
 
-def salvaConNome(estensione):
+def save_as(estensione: str) -> str:
+    """
+    Opens a save dialog to choose where to save the output file.
+
+    Args:
+        estensione: Default file extension for the saved file (e.g. '.pdf').
+
+    Returns:
+        The absolute path chosen by the user, or an empty string if cancelled.
+    """
+    if platform.system() == "Linux":
+        if shutil.which('zenity'):
+            comando = ['zenity', '--file-selection', '--save', '--confirm-overwrite', f'--title=Salva come (*{estensione})']
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+            if risultato.returncode == 0:
+                percorso = risultato.stdout.strip()
+                if not percorso.endswith(estensione): percorso += estensione
+                return percorso
+            return ""
+            
+        elif shutil.which('kdialog'):
+            comando = ['kdialog', '--getsavefilename', '.', f'*{estensione}', '--title', 'Salva file convertito come...']
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+            if risultato.returncode == 0:
+                percorso = risultato.stdout.strip()
+                if not percorso.endswith(estensione): percorso += estensione
+                return percorso
+            return ""
     root = tkinter.Tk()
     root.withdraw() #creato finestra e nascosta
     root.attributes('-topmost', True)
-    percorso_salvataggio = filedialog.asksaveasfilename(title="Salva file convertito come...",defaultextension=estensione)
+    saving_path = filedialog.asksaveasfilename(title="Salva file convertito come...",defaultextension=estensione)
     root.destroy()
-    return percorso_salvataggio
+    return saving_path
 
-####################################################################################################################################à##
+####################################################################################################################################
 
-def scegliCartella():
+def chose_directory() -> str:
+    """
+    Opens a dialog to choose a destination folder.
+
+    Returns:
+        The absolute path of the chosen directory, or an empty string if cancelled.
+    """
+    if platform.system() == "Linux":
+        if shutil.which('zenity'):
+            comando = ['zenity', '--file-selection', '--directory', '--title=Scegli cartella in cui salvare..']
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+            if risultato.returncode == 0:
+                return risultato.stdout.strip()
+            return ""
+            
+        elif shutil.which('kdialog'):
+            comando = ['kdialog', '--getexistingdirectory', '.', '--title', 'Scegli cartella in cui salvare..']
+            risultato = subprocess.run(comando, capture_output=True, text=True)
+            if risultato.returncode == 0:
+                return risultato.stdout.strip()
+            return ""
     root=tkinter.Tk()
     root.withdraw()
     root.attributes('-topmost', True)
-    cartellaSalvataggio=filedialog.askdirectory(title='Scegli cartella in cui salvare..')
+    saving_directory=filedialog.askdirectory(title='Scegli cartella in cui salvare..')
     root.destroy()
-    return cartellaSalvataggio
+    return saving_directory
 
 #######################################################################################################################################
 
-def trova_eseguibile(nome_eseguibile, pattern_windows_fallback=None):
-    """
-    Cerca un eseguibile nel sistema in questo ordine:
-    1. PATH di sistema
-    2. Percorsi standard (Windows)
-    3. Chiede all'utente
-    """
-   
-    nome_eseguibile_str = str(nome_eseguibile)
 
-    percorso = shutil.which(nome_eseguibile_str)
-    if percorso:
-        return percorso
-        
-    if os.name == 'nt' and pattern_windows_fallback:
-        for pattern in pattern_windows_fallback:
-            risultati = glob.glob(pattern)
-            if risultati:
-                return risultati[0] # Ritorna il primo trovato
-                
-    #Chiediamo all'utente
-    print(f"\n[!] Non riesco a trovare l'eseguibile: {nome_eseguibile_str}")
-    print("Selezionalo manualmente dalla finestra che sta per aprirsi...")
-    
-    root = tkinter.Tk()
-    root.withdraw()
-    root.attributes('-topmost', True)
-    percorso_manuale = filedialog.askopenfilename(
-        title=f"Trova {nome_eseguibile_str}",
-        filetypes=[("Eseguibili", "*.exe")] if os.name == 'nt' else [("Tutti i file", "*.*")]
-    )
-    root.destroy()
-    
-    if percorso_manuale:
-        return percorso_manuale
-    else:
-        raise FileNotFoundError(f"L'eseguibile {nome_eseguibile_str} è strettamente necessario per continuare.")
     
 #######################################################################################################################################
 
-def ottieni_percorso_base():
+def get_base_path() -> str:
     """ 
-    Restituisce il percorso assoluto in cui si trova il programma,
-    sia che sia eseguito come script .py, sia come .exe compilato. 
+    Returns the absolute path of the directory where the program is located,
+    whether it is running as a .py script or as a compiled .exe.
+
+    Returns:
+        The absolute path of the program's base directory.
     """
     if getattr(sys, 'frozen', False):
         # Se stiamo girando come .exe compilato

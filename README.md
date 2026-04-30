@@ -1,49 +1,127 @@
-# **Convertitore Universale Multi-Formato**
+# Convertitore Universale Multi-Formato
 
-Un'applicazione desktop basata su Python per la gestione e conversione di file PDF, immagini e video. 
+Applicazione desktop basata su Python progettata per la gestione e la conversione di file PDF, immagini e video. Il software è compatibile con Windows e Linux e adatta automaticamente la propria interfaccia e i motori di elaborazione in base al sistema operativo rilevato.
 
-### **Funzionalità**
+---
 
-**PDF:**
+## Funzionalità
 
--Conversione in PDF/A-1b
+**PDF**
+- Conversione in formato PDF/A-1b (standard per l'archiviazione a lungo termine).
+- Compressione del PDF con tre livelli di qualità (Alta, Media, Bassa).
+- Unione di più file PDF in un unico documento.
 
--Compressione del pdf con tre livelli di qualità
+**Immagini**
+- Conversione di una o più immagini in un unico file PDF.
+- Compressione intelligente delle immagini.
+- Conversione in formato JPG con supporto nativo per il formato Apple HEIC.
 
--Unione di più pdf in uno singolo
+**Video**
+- Conversione di file video in formato MP4 (codec H.264).
+- Compressione video con tre livelli di intensità per bilanciare qualità e peso del file.
 
-**Immagini:**
+---
 
--Conversione di una o più immagini in pdf
+## Utilizzo
 
--Compressione dell'immagine
+### Utenti finali — Windows
 
--Conversione in JPG
+Scaricare l'eseguibile dalla sezione **Releases** della repository. Nessuna installazione aggiuntiva richiesta — GhostScript e FFmpeg sono già inclusi nel pacchetto. Avviare direttamente il file `.exe`.
 
-**Video:**
+---
 
--Conversione in MP4
+### Utenti finali — Linux
 
--Compressione del video con tre livelli di qualità
+Su Linux non è disponibile un eseguibile precompilato. È necessario eseguire il programma tramite Python, ma non sono richieste conoscenze tecniche particolari — seguire i passi qui sotto.
 
-### **Requisiti Tecnici**
+**1. Installare Python 3.11 o superiore** (se non già presente):
 
--Dipendenze Python
+```bash
+# Ubuntu / Debian
+sudo apt install python3 python3-pip
 
--Per eseguire il codice sorgente, è necessario installare le seguenti librerie:
+# Fedora
+sudo dnf install python3 python3-pip
+```
 
-pip install pillow pikepdf
+**2. Installare le dipendenze Python:**
 
-Il progetto si appoggia ai seguenti motori esterni motori esterni per l'elaborazione dei media.
+```bash
+pip install pillow pikepdf pillow-heif
+```
 
-**Ghostscript**: Necessario per l'unione e la compressione dei PDF.
+**3. Installare GhostScript, FFmpeg e Zenity:**
 
-Scarica l'eseguibile da Ghostscript Downloads.
+Ubuntu / Debian e derivate:
+```bash
+sudo apt update
+sudo apt install ffmpeg ghostscript zenity
+```
 
-Estrai o installa il contenuto e inserisci la cartella di installazione rinominandola in gs all'interno della directory principale del progetto (il percorso atteso è gs/bin/gswin64c.exe).
+Fedora e derivate:
+```bash
+sudo dnf install ghostscript zenity
+```
 
-**FFmpeg**: Necessario per la gestione dei video.
+> **Nota per utenti Fedora:** La versione `ffmpeg-free` inclusa nei repository ufficiali non include i codec H.264 necessari. È necessario installare FFmpeg dai repository RPM Fusion:
+> ```bash
+> sudo dnf install https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+> sudo dnf install ffmpeg
+> ```
+> Per verificare che i codec siano stati installati correttamente:
+> ```bash
+> ffmpeg -encoders | grep libx264
+> ```
 
-Scarica l'eseguibile da FFmpeg.org.
+**4. Avviare il programma:**
 
-Inserisci il file ffmpeg.exe direttamente nella cartella principale del progetto.
+```bash
+python main.py
+```
+
+---
+
+### Sviluppatori — Windows e Linux
+
+Questa sezione è rivolta a chi vuole modificare o estendere il codice sorgente, o compilare l'eseguibile Windows.
+
+**1. Clonare la repository:**
+
+```bash
+git clone <url_repository>
+cd <nome_cartella>
+```
+
+**2. Installare le dipendenze Python:**
+
+```bash
+pip install pillow pikepdf pillow-heif pyinstaller
+```
+
+**3. Installare GhostScript e FFmpeg:**
+
+Su **Linux** seguire le stesse istruzioni della sezione utenti finali Linux qui sopra.
+
+Su **Windows** i due eseguibili devono essere posizionati manualmente nella cartella del progetto con la seguente struttura:
+
+```
+progetto/
+├── main.py
+├── classi.py
+├── funzioni.py
+├── config.toml
+├── ffmpeg.exe                  ← file eseguibile FFmpeg
+└── gs/
+    └── bin/
+        └── gswin64c.exe        ← file eseguibile GhostScript
+```
+
+- GhostScript per Windows: [Ghostscript Downloads](https://www.ghostscript.com/releases/gsdnld.html)
+- FFmpeg per Windows: [FFmpeg.org](https://ffmpeg.org/download.html)
+
+**4. Avviare il programma in modalità sviluppo:**
+
+```bash
+python main.py
+```
+

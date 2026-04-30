@@ -1,0 +1,28 @@
+[executables]
+
+
+[output_suffixes]
+pdfa = "_pdfa"
+compressed = "_compressed"
+converted_jpg = "_converted_to_jpg"
+converted_mp4 = "_converted_to_mp4"
+
+[pdf]
+compatibility_level = "1.4"
+
+[image]
+jpeg_quality = 100
+jpeg_subsampling = 0
+compress_quality = 80
+
+[video]
+codec_video = "libx264"
+codec_audio = "aac"
+audio_bitrate = "128k"
+preset = "fast"
+crf_low = "23"
+crf_medium = "28"
+crf_high = "35"
+
+[constants]
+bytes_per_mb = 1048576
