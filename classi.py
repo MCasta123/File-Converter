@@ -177,7 +177,7 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
             suffix=self.config['output_suffixes']['pdfa']
             file_name=os.path.basename(self.path)
             file_name_without_extension=os.path.splitext(file_name)[0]
-            new_name=file_name_without_extension+suffix
+            new_name=file_name_without_extension+suffix+'.pdf'
             output_path=os.path.join(directory_path,new_name)
         
         if not output_path:
@@ -237,7 +237,7 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
              suffix=self.config['output_suffixes']['compressed']
              file_name=os.path.basename(self.path)
              file_name_without_extension=os.path.splitext(file_name)[0]
-             new_name=file_name_without_extension+suffix
+             new_name=file_name_without_extension+suffix+'.pdf'
              output_path=os.path.join(directory_path,new_name)
         
             if not output_path:
@@ -397,7 +397,8 @@ class ImageFile(GenericFile):
             finally:    #blocco che si assicura che a prescindere tutte le immagini aperte vengano chiuse
                 for img in other_immage:
                     img.close()
-                img1.close()
+                if 'img1' in locals():  #controlla che img1 sia tra le variabili locali, altrimenti se l'apertura era fallita e provo a chiudere img1 avrei errore
+                    img1.close()
 
         else:
             print('ERRORE,riprovare')
