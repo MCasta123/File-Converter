@@ -338,16 +338,16 @@ class ImageFile(GenericFile):
     def get_available_actions(self) -> None:
         print('Le azioni disponibili sono: \n')
         print('---->Per convertire l\'immagini in pdf premere 1')
-        print('---->Per comprimere l\'immage premere 2')
-        print('---->Per convertire l\'immage in jpg premere 3')
+        print('---->Per comprimere l\'immagine premere 2')
+        print('---->Per convertire l\'immagine in jpg premere 3')
 
     def choose_action(self, choice: int, directory_path: str = '', extra_parameters: dict | None = None) -> None:
         if extra_parameters is None:
             extra_parameters={}
         choice_map={
             1 : self._convert_to_PDF,
-            2 : self._immage_compress,
-            3 : self._converto_to_JPG
+            2 : self._image_compress,
+            3 : self._convert_to_JPG
         }   
         if choice in choice_map:
             if extra_parameters:  #per ora niente parametri extra, qui non si dovrebbe entrare
@@ -382,26 +382,26 @@ class ImageFile(GenericFile):
             file_list=[]
         if file_list:
             output_path = save_as('.pdf')
-            other_immage=[]
+            other_image=[]
             if not output_path:
                 return
             try:
                 img1=Image.open(file_list[0])
                 if img1.mode!='RGB':
                     img1=img1.convert('RGB')
-                for immage in file_list[1:]:
-                    img_temp=Image.open(immage)
+                for image in file_list[1:]:
+                    img_temp=Image.open(image)
                     if img_temp.mode!='RGB':
                         img_temp=img_temp.convert('RGB')
-                    other_immage.append(img_temp)
-                img1.save(output_path,'PDF',save_all=True,append_images=other_immage)
+                    other_image.append(img_temp)
+                img1.save(output_path,'PDF',save_all=True,append_images=other_image)
                 print(f'Il file {os.path.basename(output_path)} è stato creato correttamente')
             except UnidentifiedImageError as e:
                 print(f'Errore nell\' apertura dell\'immagine : {e}')
             except OSError as e:
                 print(f'Errore nel salvataggio del file {e}')
             finally:    #blocco che si assicura che a prescindere tutte le immagini aperte vengano chiuse
-                for img in other_immage:
+                for img in other_image:
                     img.close()
                 if 'img1' in locals():  #controlla che img1 sia tra le variabili locali, altrimenti se l'apertura era fallita e provo a chiudere img1 avrei errore
                     img1.close()
@@ -410,7 +410,7 @@ class ImageFile(GenericFile):
             print('ERRORE,riprovare')
 
 
-    def _immage_compress(self, directory_path: str) -> None:
+    def _image_compress(self, directory_path: str) -> None:
         """
         Compresses the image file, preserving its original format.
 
@@ -451,7 +451,7 @@ class ImageFile(GenericFile):
             print(f'Errore nel salvataggio del file {e}')
 
 
-    def _converto_to_JPG(self, directory_path: str) -> None:
+    def _convert_to_JPG(self, directory_path: str) -> None:
         """
         Converts the image to JPEG format.
 
@@ -464,7 +464,7 @@ class ImageFile(GenericFile):
         """
         extension=Path(self.path).suffix.lower()
         if extension in ['.jpg', '.jpeg']:
-            print(f'L\'immage {os.path.basename(self.path)} è già un jpg')
+            print(f'L\'immagine {os.path.basename(self.path)} è già un jpg')
             return
         if directory_path=='': #un file solo
             output_path = save_as(".jpg")
