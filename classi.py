@@ -236,11 +236,11 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
             if directory_path=='': #un file solo
                 output_path = save_as(".pdf")
             else:   #gestione di più file
-             suffix=self.config['output_suffixes']['compressed']
-             file_name=os.path.basename(self.path)
-             file_name_without_extension=os.path.splitext(file_name)[0]
-             new_name=file_name_without_extension+suffix+'.pdf'
-             output_path=os.path.join(directory_path,new_name)
+                suffix=self.config['output_suffixes']['compressed']
+                file_name=os.path.basename(self.path)
+                file_name_without_extension=os.path.splitext(file_name)[0]
+                new_name=file_name_without_extension+suffix+'.pdf'
+                output_path=os.path.join(directory_path,new_name)
         
             if not output_path:
                 return

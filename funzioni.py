@@ -3,7 +3,6 @@ import os
 import tkinter
 import shutil
 from tkinter import filedialog
-import glob
 import sys
 import subprocess
 
