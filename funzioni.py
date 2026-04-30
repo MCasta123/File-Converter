@@ -6,6 +6,7 @@ from tkinter import filedialog
 import sys
 import subprocess
 import tomllib
+import tomlkit
 
 
 ################################################################################################################################
@@ -146,9 +147,9 @@ def load_settings() -> dict :
     
     if os.path.exists(preferences_path):    #file già creato
         try:
-            with open(preferences_path,'rb') as f:
-                preferences=tomllib.load(f)
-                print('già  creato')
+            with open(preferences_path, "r", encoding="utf-8") as f:
+                preferences=tomlkit.load(f)
+                return preferences
         except tomllib.TOMLDecodeError as e:
             print(f'Errore: preferences.toml non è valido: {e}')
             sys.exit(1)
@@ -172,15 +173,46 @@ def load_settings() -> dict :
             f.write(settings)
             
         try:
-            with open(preferences_path,'rb') as f:
-                preferences=tomllib.load(f)
-                print('creato')
+            with open(preferences_path, "r", encoding="utf-8") as f:
+                preferences=tomlkit.load(f)
         except tomllib.TOMLDecodeError as e:
             print(f'Errore: preferences.toml non è valido: {e}')
             sys.exit(1)
         
         return preferences    
             
+def modify_settings(category : str, selected_change: dict) -> bool:
+    """
+    Function to modify the user preferences
+    Args:
+        category: string that indicate the category of the change
+        selected_change: dictionary where key is the option that user want to change and value is the choice made
+    Retruns:
+        A boolean value that indicate if the operation went well or not
+    """
+    base_dir = get_base_path()
+    config_path = os.path.join(base_dir, 'preferences.toml')
+    if not os.path.exists(config_path):
+        print('Errore il file preferences.toml non esiste')
+        return
+    try:
+        settings=load_settings()
+        if category and selected_change and settings:
+            key, value = next(iter(selected_change.items()))    #seleziono chiave e valore dell'unico elemento nel dizionario selected_change
+            category_list=list(settings.keys())
+            if category in category_list:
+                change_list=list(settings[category].keys())
+                if key in change_list:
+                    settings[category][key]=value
+                    try:
+                        with open("preferences.toml", "w", encoding="utf-8") as f:
+                            tomlkit.dump(settings, f)
+                    except ValueError as e:
+                        print(f'Errore nella modifica : {e}') 
+    except ValueError as e:
+        print(f'Errore nell\' apertura del file preferences.toml: {e}')
+    
+    
     
     
     
