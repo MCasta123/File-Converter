@@ -2,9 +2,18 @@ from funzioni import chose_directory,chose_file
 from classi import GenericFile, check_homogeneity
 import traceback
 import tomllib
+import sys
 
-with open('config.toml', 'rb') as f:
-    config = tomllib.load(f)
+try:
+    with open('config.toml', 'rb') as f:
+        config = tomllib.load(f)
+except FileNotFoundError:
+    print('Errore: file config.toml non trovato.')
+    sys.exit(1)
+except tomllib.TOMLDecodeError as e:
+    print(f'Errore: config.toml non è valido: {e}')
+    sys.exit(1)
+    
 while True: #LOOP CHE FA CCONTINUARE IL PROGRAMMA
     
     files_paths=chose_file()   #permetto di scegliere uno o più file
