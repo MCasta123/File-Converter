@@ -7,6 +7,7 @@ import subprocess
 import pikepdf
 from funzioni import save_as, get_base_path
 import platform
+import questionary
 from questionary import Choice
 
 
@@ -120,9 +121,7 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
         action2='Comprimi pdf'
         action3='Unisci più pdf'
         list_of_actions=[]
-        list_of_actions.append(action1)
-        list_of_actions.append(action2)
-        list_of_actions.append(action3)
+        list_of_actions.extend([action1,action2,action3])
         available_actions=[]
         for el in list_of_actions:
             x=1 #valore da assegnare
@@ -153,16 +152,18 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
 
     def add_extra_parameters(self, choice: int, file_list: list | None = None) -> dict:
         if choice==2:
-            print('Scegli la qualità di compressione: \n')
-            print('----->Premere 1 per qualità alta, compressione bassa')
-            print('----->Premere 2 per qualità media, compressione media')
-            print('----->Premere 3 per qualità bassa, compressione alta')
-            while True:
-                try:
-                    quality = int(input())
-                    break  # ← uscita dal loop solo se la conversione è andata a buon fine
-                except ValueError:
-                    print('Inserire un numero valido')
+            quality1='Qualità alta, compressione bassa'
+            quality2='Qualità media, compressione media'
+            quality3='Qualità bassa, compressione bassa'
+            list_of_quality=[]
+            list_of_quality.extend([quality1,quality2,quality3])
+            available_quality=[]
+            for el in list_of_quality:
+                x=1 #valore da assegnare
+                available_quality.append(Choice(title=el,value=x))
+                x+=1
+            print('\n')
+            quality=questionary.select('Scegli la qualità di compressione',choices=available_quality).ask()
             return {'quality' : quality}
         elif choice==3: #qui non si aggiunge parametri extra ma si usa la funzione per chiamarne un altra senza fare il ciclo for del main
             if file_list:   #serve per quando si passa più file ma se ne vuole solo uno in output, quindi la funzione unisce i file in uno
@@ -351,9 +352,7 @@ class ImageFile(GenericFile):
         action2='Comprimi immagine'
         action3='Converti immagine in jpg'
         list_of_actions=[]
-        list_of_actions.append(action1)
-        list_of_actions.append(action2)
-        list_of_actions.append(action3)
+        list_of_actions.extend([action1,action2,action3])
         available_actions=[]
         for el in list_of_actions:
             x=1 #valore da assegnare
@@ -556,8 +555,7 @@ class VideoFile(GenericFile):
         action1='Converti video in mp4'
         action2='Comprimi video'
         list_of_actions=[]
-        list_of_actions.append(action1)
-        list_of_actions.append(action2)
+        list_of_actions.extend([action1,action2])
         available_actions=[]
         for el in list_of_actions:
             x=1 #valore da assegnare
@@ -567,17 +565,19 @@ class VideoFile(GenericFile):
     
     def add_extra_parameters(self, choice: int, file_list: list | None = None) -> dict:
         if choice==2:
-            print('Selezionare la qualità di compressione:')
-            print('---->Premere 1 per compressione leggera: ')
-            print('---->Premere 2 per compressione media(riduce molto il peso ma qualità accettabile): ')
-            print('---->Premere 3 per compressione pesante(qualità bassa): ')
-            while True:
-                try:
-                    quality = int(input())
-                    break  # ← uscita dal loop solo se la conversione è andata a buon fine
-                except ValueError:
-                    print('Inserire un numero valido')
-            return {'quality': quality}
+            quality1='Compressione leggera'
+            quality2='Compressione media'
+            quality3='Compressione pesante'
+            list_of_quality=[]
+            list_of_quality.extend([quality1,quality2,quality3])
+            available_quality=[]
+            for el in list_of_quality:
+                x=1 #valore da assegnare
+                available_quality.append(Choice(title=el,value=x))
+                x+=1
+            print('\n')
+            quality=questionary.select('Scegli la qualità di compressione',choices=available_quality).ask()
+            return {'quality' : quality}
         else:
             return {}
 
