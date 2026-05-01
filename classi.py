@@ -7,6 +7,7 @@ import subprocess
 import pikepdf
 from funzioni import save_as, get_base_path
 import platform
+from questionary import Choice
 
 
 # Inizializza il plugin per leggere i file HEIC (Apple)
@@ -90,8 +91,8 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
         pass
 
     @abstractmethod
-    def get_available_actions(self) -> None:
-        """Prints the list of available actions for this file type."""
+    def get_available_actions(self) -> list[Choice]:
+        """Return a list with all available actions for this file type."""
         pass
 
 #############################################################################################################################
@@ -113,11 +114,21 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
         else:
             self.gs_exe = "gs"  # trovato nel PATH di sistema)
 
-    def get_available_actions(self) -> None:
-        print('Le azioni disponibili sono: \n')
-        print('---->Per convertire il pdf in pdf/A premere 1')
-        print('---->Per comprimere il pdf premere 2')
-        print('---->Per unire i pdf premere 3')
+    def get_available_actions(self) -> list[Choice]:
+
+        action1='Converti il pdf in pdf/A'
+        action2='Comprimi pdf'
+        action3='Unisci più pdf'
+        list_of_actions=[]
+        list_of_actions.append(action1)
+        list_of_actions.append(action2)
+        list_of_actions.append(action3)
+        available_actions=[]
+        for el in list_of_actions:
+            x=1 #valore da assegnare
+            available_actions.append(Choice(title=el,value=x))
+            x+=1
+        return available_actions
 
     def choose_action(self, choice: int, directory_path: str = '', extra_parameters: dict | None = None) -> None:
         if extra_parameters is None:
@@ -335,11 +346,20 @@ class ImageFile(GenericFile):
         """
         super().__init__(file_path, config)
 
-    def get_available_actions(self) -> None:
-        print('Le azioni disponibili sono: \n')
-        print('---->Per convertire l\'immagini in pdf premere 1')
-        print('---->Per comprimere l\'immagine premere 2')
-        print('---->Per convertire l\'immagine in jpg premere 3')
+    def get_available_actions(self) -> list[Choice]:
+        action1='Converti una o più immagini in pdf'
+        action2='Comprimi immagine'
+        action3='Converti immagine in jpg'
+        list_of_actions=[]
+        list_of_actions.append(action1)
+        list_of_actions.append(action2)
+        list_of_actions.append(action3)
+        available_actions=[]
+        for el in list_of_actions:
+            x=1 #valore da assegnare
+            available_actions.append(Choice(title=el,value=x))
+            x+=1
+        return available_actions
 
     def choose_action(self, choice: int, directory_path: str = '', extra_parameters: dict | None = None) -> None:
         if extra_parameters is None:
@@ -532,10 +552,18 @@ class VideoFile(GenericFile):
             print('SCELTA NON GIUSTA')
             return
         
-    def get_available_actions(self) -> None:
-        print('Le azioni disponibili sono: \n')
-        print('---->Per convertire il video in mp4 premere 1')
-        print('---->Per comprimere il video premere 2')
+    def get_available_actions(self) -> list[Choice]:
+        action1='Converti video in mp4'
+        action2='Comprimi video'
+        list_of_actions=[]
+        list_of_actions.append(action1)
+        list_of_actions.append(action2)
+        available_actions=[]
+        for el in list_of_actions:
+            x=1 #valore da assegnare
+            available_actions.append(Choice(title=el,value=x))
+            x+=1
+        return available_actions
     
     def add_extra_parameters(self, choice: int, file_list: list | None = None) -> dict:
         if choice==2:
