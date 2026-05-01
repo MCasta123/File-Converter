@@ -123,8 +123,8 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
         list_of_actions=[]
         list_of_actions.extend([action1,action2,action3])
         available_actions=[]
+        x=1 #valore da assegnare
         for el in list_of_actions:
-            x=1 #valore da assegnare
             available_actions.append(Choice(title=el,value=x))
             x+=1
         return available_actions
@@ -158,8 +158,8 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
             list_of_quality=[]
             list_of_quality.extend([quality1,quality2,quality3])
             available_quality=[]
+            x=1 #valore da assegnare
             for el in list_of_quality:
-                x=1 #valore da assegnare
                 available_quality.append(Choice(title=el,value=x))
                 x+=1
             print('\n')
@@ -354,8 +354,8 @@ class ImageFile(GenericFile):
         list_of_actions=[]
         list_of_actions.extend([action1,action2,action3])
         available_actions=[]
+        x=1 #valore da assegnare
         for el in list_of_actions:
-            x=1 #valore da assegnare
             available_actions.append(Choice(title=el,value=x))
             x+=1
         return available_actions
@@ -557,8 +557,9 @@ class VideoFile(GenericFile):
         list_of_actions=[]
         list_of_actions.extend([action1,action2])
         available_actions=[]
+        x=1 #valore da assegnare
         for el in list_of_actions:
-            x=1 #valore da assegnare
+            
             available_actions.append(Choice(title=el,value=x))
             x+=1
         return available_actions
@@ -571,8 +572,9 @@ class VideoFile(GenericFile):
             list_of_quality=[]
             list_of_quality.extend([quality1,quality2,quality3])
             available_quality=[]
+            x=1 #valore da assegnare
             for el in list_of_quality:
-                x=1 #valore da assegnare
+                
                 available_quality.append(Choice(title=el,value=x))
                 x+=1
             print('\n')
