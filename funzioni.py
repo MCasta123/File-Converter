@@ -216,7 +216,7 @@ def modify_settings(category : str, selected_change: dict) -> bool:
         print(f'Errore nell\' apertura del file preferences.toml: {e}')
     return False
     
-def choose_from_dictionary(dictio : dict, message : str | None, dictionary_of_alias : dict | None =None, return_the_keys : bool =False) -> str | int:
+def create_menu(dictio : dict, message : str | None, dictionary_of_alias : dict | None =None, return_the_keys : bool =False) -> str | int:
     """
     Function that uses questionary library to allow the user to choose between different possibilities contained
     in the dictionary keys and returns the value
