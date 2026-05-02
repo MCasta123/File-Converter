@@ -216,23 +216,35 @@ def modify_settings(category : str, selected_change: dict) -> bool:
         print(f'Errore nell\' apertura del file preferences.toml: {e}')
     return False
     
-def choose_from_dictionary(dictionary : dict, message : str | None) -> str | int:
+def choose_from_dictionary(dictio : dict, message : str | None, dictionary_of_alias : dict | None =None) -> str | int:
     """
     Function that uses questionary library to allow the user to choose between different possibilities contained
     in the dictionary keys and returns the value
     Args:
-        dictionary: key's dictionary is what user see, values's dictionary is what the proram uses
+        dictio: key's dictionary is what user see, values's dictionary is what the proram uses
         message : A strings that represent the title of the choice
+        dictionary_of_alias: dictionary where keys are dictio's keys and values are alias of the keys
     Returns:
         value : the value of the user' s input chosen from dictionary
     """
-    if dictionary:
+    if dictio:
         list_of_actions=[]
-        for action in dictionary:
+        for action in dictio:
             list_of_actions.append(action)
         available_actions=[]
+        alias=False #variabile che mi dice se tutto va bene e posso usare l'alias
+        if dictionary_of_alias: #solo se ho passato un alias
+            if len(dictio)==len(dictionary_of_alias):
+                keys_of_dictio=list(dictio.keys())
+                keys_of_dictionary_of_alias=list(dictionary_of_alias.keys())
+                if set(keys_of_dictio)==set(keys_of_dictionary_of_alias): #trasformo in set dove non conta l'ordine e posso controllare che siano uguali 
+                   alias=True 
+                    
         for el in list_of_actions:
-            available_actions.append(Choice(title=el,value=dictionary[el]))
+            element=el
+            if alias==True:
+                element=dictionary_of_alias[el]
+            available_actions.append(Choice(title=element,value=dictio[el]))
         value=questionary.select(message,choices=available_actions).ask()
         return value
     else: 
