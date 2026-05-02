@@ -13,7 +13,7 @@ from questionary import Choice
 
 ################################################################################################################################
 
-def chose_file() -> tuple | str:
+def choose_file() -> tuple | str:
     """
     Opens a file dialog to select one or more files.
 

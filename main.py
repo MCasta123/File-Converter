@@ -1,4 +1,4 @@
-from funzioni import chose_directory,chose_file, get_base_path,load_settings,modify_settings
+from funzioni import chose_directory,choose_file, get_base_path,load_settings,modify_settings
 from classi import GenericFile, check_homogeneity
 import traceback
 import tomllib
@@ -25,7 +25,7 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                        choices=[Choice(title='Inizia a Convertire',value=1),Choice(title='Impostazioni',value=2),Choice(title='Esci',value=0)]).ask()
     if action_choice==1:    #gestione selezione files
 
-        files_paths=chose_file()   #permetto di scegliere uno o più file
+        files_paths=choose_file()   #permetto di scegliere uno o più file
         if files_paths:    #controllo che non sia vuota la tupla
             if check_homogeneity(files_paths):   #controllo che tutti i file siano relativi alla stessa classe
                 try:
