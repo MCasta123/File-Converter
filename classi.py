@@ -5,10 +5,9 @@ from pathlib import Path  #libreria importata per estrarre facilmente l' extensi
 from abc import ABC, abstractmethod
 import subprocess
 import pikepdf
-from funzioni import save_as, get_base_path
+from funzioni import save_as, get_base_path, create_menu
 import platform
-import questionary
-from questionary import Choice
+
 
 
 # Inizializza il plugin per leggere i file HEIC (Apple)
@@ -151,18 +150,12 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
 
     def add_extra_parameters(self, choice: int, file_list: list | None = None) -> dict:
         if choice==2:
-            quality1='Qualità alta, compressione bassa'
-            quality2='Qualità media, compressione media'
-            quality3='Qualità bassa, compressione bassa'
-            list_of_quality=[]
-            list_of_quality.extend([quality1,quality2,quality3])
-            available_quality=[]
-            x=1 #valore da assegnare
-            for el in list_of_quality:
-                available_quality.append(Choice(title=el,value=x))
-                x+=1
-            print('\n')
-            quality=questionary.select('Scegli la qualità di compressione',choices=available_quality).ask()
+            available_quality={
+                'Qualità alta, compressione bassa' : 1,
+                'Qualità media, compressione media' : 2,
+                'Qualità bassa, compressione alta' : 3
+            }
+            quality=create_menu(message='Scegli la qualità di compressione', dictio=available_quality)
             return {'quality' : quality}
         elif choice==3: #qui non si aggiunge parametri extra ma si usa la funzione per chiamarne un altra senza fare il ciclo for del main
             if file_list:   #serve per quando si passa più file ma se ne vuole solo uno in output, quindi la funzione unisce i file in uno
@@ -555,6 +548,13 @@ class VideoFile(GenericFile):
     
     def add_extra_parameters(self, choice: int, file_list: list | None = None) -> dict:
         if choice==2:
+            available_quality={
+                'Compressione bassa' : 1,
+                'Compressione media' : 2,
+                'Compressione alta' : 3
+            }
+            quality=create_menu(message='Scegli la qualità di ccompressione', dictio=available_quality)
+            '''
             quality1='Compressione leggera'
             quality2='Compressione media'
             quality3='Compressione pesante'
@@ -568,6 +568,7 @@ class VideoFile(GenericFile):
                 x+=1
             print('\n')
             quality=questionary.select('Scegli la qualità di compressione',choices=available_quality).ask()
+            '''
             return {'quality' : quality}
         else:
             return {}

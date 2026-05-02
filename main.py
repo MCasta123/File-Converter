@@ -1,11 +1,10 @@
-from funzioni import choose_directory,choose_file, get_base_path,load_settings,modify_settings
+from funzioni import choose_directory,choose_file, get_base_path,load_settings,modify_settings, create_menu
 from classi import GenericFile, check_homogeneity
 import traceback
 import tomllib
 import sys
 import os
-import questionary
-from questionary import Choice
+
 
 try:
     config_path=os.path.join(get_base_path(),'config.toml') #ricavo il percorso del file config.toml
@@ -21,8 +20,12 @@ if not os.path.exists(os.path.join(get_base_path(),'preferences.toml')): #se è 
     load_settings()
 while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
     print(f'{'='*100}')
-    action_choice=questionary.select('Scegli cosa vuoi fare',
-                       choices=[Choice(title='Inizia a Convertire',value=1),Choice(title='Impostazioni',value=2),Choice(title='Esci',value=0)]).ask()
+    initial_actions={
+        'Inizia a convertire' : 1,
+        'Impostazioni' : 2,
+        'Esci' : 0
+    }
+    action_choice=create_menu(message='Scegli cosa vuoi fare', dictio=initial_actions)
     if action_choice==1:    #gestione selezione files
 
         files_paths=choose_file()   #permetto di scegliere uno o più file
@@ -32,7 +35,7 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                     temp_object=GenericFile.create_from_path(files_paths[0],config=config)  #creo un oggetto temporaneo per poter accedere alle azioni disponibili
                     available_actions=temp_object.get_available_actions()
                     print('\n')
-                    choice=questionary.select('Le azioni disponibili per questo file sono:', choices=available_actions).ask()
+                    choice=create_menu(message='Le azioni disponibili per questo file sono: ', dictio=available_actions)
                     directory_path=''
                     extra_parameters=temp_object.add_extra_parameters(choice=choice,file_list=files_paths)
                     if 'stop' in extra_parameters:
@@ -43,8 +46,8 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                             directory_path=choose_directory()
                             if directory_path=='':
                                 print('\n')
-                                check=questionary.select('Errore, non hai selezionato la cartella di destinazione',
-                                                         choices=[Choice(title='Torna alla home',value=1),Choice(title='Esci',value=0)]).ask()
+                                message='Errore, non hai selezionato la cartella di destinazione'
+                                check=create_menu(message=message,dictio={'Torna alla home' : 1, 'Esci' : 0})
                                 if check==0:
                                     break
                                 else:
@@ -60,8 +63,8 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                     
                 
                 print('\n')
-                check=questionary.select('Cosa vuoi fare?',
-                                                         choices=[Choice(title='Torna alla home',value=1),Choice(title='Esci',value=0)]).ask()
+                message='Cosa vuoi fare?'
+                check=create_menu(message=message,dictio={'Torna alla home' : 1, 'Esci' : 0})
                 if check==0:
                     break
 
@@ -70,18 +73,19 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                 print('I formati supportati sono: pdf, jpg, jpeg, png, heic, mov, mp4')
                 print('Si ricorda inoltre che in caso di selezione di più file, i file devono essere dello stesso tipo (es: tutte immagini---->quindi jpg jpeg png)')
                 print('\n')
-                check=questionary.select('Cosa vuoi fare?',
-                                        choices=[Choice(title='Torna alla home',value=1),Choice(title='Esci',value=0)]).ask()
+                message='Cosa vuoi fare?'
+                check=create_menu(message=message,dictio={'Torna alla home' : 1, 'Esci' : 0})
                 if check==0:
                     break
         else:
             print('ERRORE')
             print('\n')
-            check=questionary.select('Cosa vuoi fare?',
-                                    choices=[Choice(title='Torna alla home',value=1),Choice(title='Esci',value=0)]).ask()
+            message='Cosa vuoi fare?'
+            check=create_menu(message=message,dictio={'Torna alla home' : 1, 'Esci' : 0})
             if check==0:
                 break
     elif action_choice==2:
+        
         possible_actions={
             'Impostazioni file pdf' : 'pdf',
             'Impostazioni immagini' : 'image',
@@ -89,36 +93,27 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
             'Impostazioni generali' : 'general',
             'Torna alla home' : ''
         }
-        list_of_actions=[]
-        for action in possible_actions:
-            list_of_actions.append(action)
-        available_actions=[]
-        for el in list_of_actions:
-            available_actions.append(Choice(title=el,value=possible_actions[el]))
-        category=questionary.select('Che tipo di impostazione vuoi modificare',choices=available_actions).ask()
+        category=create_menu(dictio=possible_actions, message='Che tipo di impostazioni vuoi modificare')
         settings=load_settings()
         if category in settings:
+            
             possible_changes=settings[category]
-            changes=[]
-            for change in possible_changes:
-                changes.append(Choice(title=change, value=change))
-            changes.append(Choice(title='Torna alla home',value=''))
-            print('\n')
-            selected_change=questionary.select('Cosa vuoi modificare? ', choices=changes).ask()
-        
+
+            possible_changes_alias={
+                'pdf_compression_quality' : 'Scegli la qualità di compressione dei files pdf',
+                'video_compression_quality' : 'Scegli la qualità di compressione dei video',
+                'after conversion' : 'Scegli cosa fa il convertitore dopo aver convertito i files'
+            }
+            selected_change=create_menu(dictio=possible_changes, message='Cosa vuoi modificare? ',return_the_keys=True, dictionary_of_alias=possible_changes_alias)
         if category=='pdf':   #impostazioni pdf
 
             if selected_change=='pdf_compression_quality': #qui si cambia le impostazioni relative alla compressione dei file pdf
-                quality_map={
+                pdf_quality_map={
                         'Qualità alta, compressione bassa' : 1,
                         'Qualità media, compressione media' : 2,
                         'Qualità bassa, compressione bassa' : 3
                 }
-                available_quality=[]
-                for el in quality_map:
-                    available_quality.append(Choice(title=el,value=quality_map[el]))
-                print('\n')
-                quality=questionary.select('Scegli la qualità di compressione',choices=available_quality).ask()
+                quality=create_menu(dictio=pdf_quality_map,message='Scegli la qualità di compressione')
                 modify_settings(category=category,selected_change={selected_change : quality})
             else:
                 continue
@@ -128,16 +123,12 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
         
         elif category=='video': #impostazioni video
             if selected_change=='video_compression_quality': #qui si cambia le impostazioni relative alla compressione dei video
-                quality_map={
+                video_quality_map={
                         'Compressione leggera' : 1,
                         'Compressione media' : 2,
                         'Compressione alta' : 3
                 }
-                available_quality=[]
-                for el in quality_map:
-                    available_quality.append(Choice(title=el,value=quality_map[el]))
-                print('\n')
-                quality=questionary.select('Scegli la qualità di compressione',choices=available_quality).ask()
+                quality=create_menu(dictio=video_quality_map, message='Scegli la qualità di compressione')
                 modify_settings(category=category,selected_change={selected_change : quality})
             else:
                 continue
