@@ -216,7 +216,7 @@ def modify_settings(category : str, selected_change: dict) -> bool:
         print(f'Errore nell\' apertura del file preferences.toml: {e}')
     return False
     
-def choose_from_dictionary(dictio : dict, message : str | None, dictionary_of_alias : dict | None =None) -> str | int:
+def choose_from_dictionary(dictio : dict, message : str | None, dictionary_of_alias : dict | None =None, return_the_keys : bool =False) -> str | int:
     """
     Function that uses questionary library to allow the user to choose between different possibilities contained
     in the dictionary keys and returns the value
@@ -224,6 +224,7 @@ def choose_from_dictionary(dictio : dict, message : str | None, dictionary_of_al
         dictio: key's dictionary is what user see, values's dictionary is what the proram uses
         message : A strings that represent the title of the choice
         dictionary_of_alias: dictionary where keys are dictio's keys and values are alias of the keys
+        return_the_keys : boolean parameter, if False (default) the function return the value of dict, if True it returns the key
     Returns:
         value : the value of the user' s input chosen from dictionary
     """
@@ -244,7 +245,10 @@ def choose_from_dictionary(dictio : dict, message : str | None, dictionary_of_al
             element=el
             if alias==True:
                 element=dictionary_of_alias[el]
-            available_actions.append(Choice(title=element,value=dictio[el]))
+            if return_the_keys: 
+                available_actions.append(Choice(title=element,value=el))
+            else:
+                available_actions.append(Choice(title=element,value=dictio[el]))
         value=questionary.select(message,choices=available_actions).ask()
         return value
     else: 
