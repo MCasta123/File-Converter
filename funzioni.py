@@ -234,12 +234,14 @@ def choose_from_dictionary(dictio : dict, message : str | None, dictionary_of_al
             list_of_actions.append(action)
         available_actions=[]
         alias=False #variabile che mi dice se tutto va bene e posso usare l'alias
-        if dictionary_of_alias: #solo se ho passato un alias
-            if len(dictio)==len(dictionary_of_alias):
+        if dictionary_of_alias:
                 keys_of_dictio=list(dictio.keys())
                 keys_of_dictionary_of_alias=list(dictionary_of_alias.keys())
-                if set(keys_of_dictio)==set(keys_of_dictionary_of_alias): #trasformo in set dove non conta l'ordine e posso controllare che siano uguali 
-                   alias=True 
+                alias=True
+                for key in keys_of_dictio:
+                    if not key in keys_of_dictionary_of_alias:
+                        alias=False
+                        break
                     
         for el in list_of_actions:
             element=el
