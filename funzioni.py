@@ -158,13 +158,12 @@ def load_settings() -> dict :
         settings="""
         #impostazioni
         [pdf]
-        compression_quality=""
+        pdf_compression_quality=""
         
         [image]
-        compression_quality=""
         
         [video]
-        compression_quality=""
+        video_compression_quality=""
         
         [general]
         after_conversion=""

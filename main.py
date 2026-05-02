@@ -1,4 +1,4 @@
-from funzioni import chose_directory,chose_file, get_base_path,load_settings
+from funzioni import chose_directory,chose_file, get_base_path,load_settings,modify_settings
 from classi import GenericFile, check_homogeneity
 import traceback
 import tomllib
@@ -17,7 +17,8 @@ except FileNotFoundError:
 except tomllib.TOMLDecodeError as e:
     print(f'Errore: config.toml non è valido: {e}')
     sys.exit(1)
-
+if not os.path.exists(os.path.join(get_base_path(),'preferences.toml')): #se è il primo avvio, crea preferences.toml
+    load_settings()
 while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
     print(f'{'='*100}')
     action_choice=questionary.select('Scegli cosa vuoi fare',
@@ -81,31 +82,72 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
             if check==0:
                 break
     elif action_choice==2:
-        action1='Impostazioni file pdf'
-        action2='Impostazioni immagini'
-        action3='Impostazioni file video'
-        action4='Impostazioni generali'
-        action5='Torna alla home'
+        possible_actions={
+            'Impostazioni file pdf' : 'pdf',
+            'Impostazioni immagini' : 'image',
+            'Impostazioni file video' : 'video',
+            'Impostazioni generali' : 'general',
+            'Torna alla home' : ''
+        }
         list_of_actions=[]
-        list_of_actions.extend([action1,action2,action3,action4,action5])
+        for action in possible_actions:
+            list_of_actions.append(action)
         available_actions=[]
-        x=1 #valore da assegnare
         for el in list_of_actions:
-            available_actions.append(Choice(title=el,value=x))
-            x+=1
-        choice=questionary.select('Cosa vuoi modificare?',choices=available_actions).ask()
+            available_actions.append(Choice(title=el,value=possible_actions[el]))
+        category=questionary.select('Che tipo di impostazione vuoi modificare',choices=available_actions).ask()
         settings=load_settings()
-        if choice==1:   #impostazioni pdf
-            print('Sono in 1')
-        elif choice==2: #impostazioni immagini
-            print('sono in 2')
-        elif choice==3: #impostazioni video
+        if category in settings:
+            possible_changes=settings[category]
+            changes=[]
+            for change in possible_changes:
+                changes.append(Choice(title=change, value=change))
+            changes.append(Choice(title='Torna alla home',value=''))
+            print('\n')
+            selected_change=questionary.select('Cosa vuoi modificare? ', choices=changes).ask()
+        
+        if category=='pdf':   #impostazioni pdf
+
+            if selected_change=='pdf_compression_quality': #qui si cambia le impostazioni relative alla compressione dei file pdf
+                quality_map={
+                        'Qualità alta, compressione bassa' : 1,
+                        'Qualità media, compressione media' : 2,
+                        'Qualità bassa, compressione bassa' : 3
+                }
+                available_quality=[]
+                for el in quality_map:
+                    available_quality.append(Choice(title=el,value=quality_map[el]))
+                print('\n')
+                quality=questionary.select('Scegli la qualità di compressione',choices=available_quality).ask()
+                modify_settings(category=category,selected_change={selected_change : quality})
+            else:
+                continue
+            
+        elif category=='image': #impostazioni immagini
+            print('NESSUNA IMPOSTAZIONE DISPONIBILE PER LE IMMAGINI')
+        
+        elif category=='video': #impostazioni video
+            if selected_change=='video_compression_quality': #qui si cambia le impostazioni relative alla compressione dei video
+                quality_map={
+                        'Compressione leggera' : 1,
+                        'Compressione media' : 2,
+                        'Compressione alta' : 3
+                }
+                available_quality=[]
+                for el in quality_map:
+                    available_quality.append(Choice(title=el,value=quality_map[el]))
+                print('\n')
+                quality=questionary.select('Scegli la qualità di compressione',choices=available_quality).ask()
+                modify_settings(category=category,selected_change={selected_change : quality})
+            else:
+                continue
+            
+        elif category=='general': #impostazioni generali
             pass
-        elif choice==4: #impostazioni generali
-            pass
+        
         else:   #torna alla home
             continue
-        
+    
     else:
         break
     
