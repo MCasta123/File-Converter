@@ -86,7 +86,7 @@ def save_as(estensione: str) -> str:
 
 ####################################################################################################################################
 
-def chose_directory() -> str:
+def choose_directory() -> str:
     """
     Opens a dialog to choose a destination folder.
 

@@ -1,4 +1,4 @@
-from funzioni import chose_directory,choose_file, get_base_path,load_settings,modify_settings
+from funzioni import choose_directory,choose_file, get_base_path,load_settings,modify_settings
 from classi import GenericFile, check_homogeneity
 import traceback
 import tomllib
@@ -40,7 +40,7 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                             pass
                     else:
                         if len(files_paths)>1:
-                            directory_path=chose_directory()
+                            directory_path=choose_directory()
                             if directory_path=='':
                                 print('\n')
                                 check=questionary.select('Errore, non hai selezionato la cartella di destinazione',
