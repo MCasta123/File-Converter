@@ -7,6 +7,8 @@ import sys
 import subprocess
 import tomllib
 import tomlkit
+import questionary
+from questionary import Choice
 
 
 ################################################################################################################################
@@ -186,14 +188,14 @@ def modify_settings(category : str, selected_change: dict) -> bool:
     Args:
         category: string that indicate the category of the change
         selected_change: dictionary where key is the option that user want to change and value is the choice made
-    Retruns:
+    Returns:
         A boolean value that indicate if the operation went well or not
     """
     base_dir = get_base_path()
     config_path = os.path.join(base_dir, 'preferences.toml')
     if not os.path.exists(config_path):
         print('Errore il file preferences.toml non esiste')
-        return
+        return False
     try:
         settings=load_settings()
         if category and selected_change and settings:
@@ -206,12 +208,35 @@ def modify_settings(category : str, selected_change: dict) -> bool:
                     try:
                         with open("preferences.toml", "w", encoding="utf-8") as f:
                             tomlkit.dump(settings, f)
+                            return True
                     except ValueError as e:
                         print(f'Errore nella modifica : {e}') 
+        
     except ValueError as e:
         print(f'Errore nell\' apertura del file preferences.toml: {e}')
+    return False
     
-    
+def choose_from_dictionary(dictionary : dict, message : str | None) -> str | int:
+    """
+    Function that uses questionary library to allow the user to choose between different possibilities contained
+    in the dictionary keys and returns the value
+    Args:
+        dictionary: key's dictionary is what user see, values's dictionary is what the proram uses
+        message : A strings that represent the title of the choice
+    Returns:
+        value : the value of the user' s input chosen from dictionary
+    """
+    if dictionary:
+        list_of_actions=[]
+        for action in dictionary:
+            list_of_actions.append(action)
+        available_actions=[]
+        for el in list_of_actions:
+            available_actions.append(Choice(title=el,value=dictionary[el]))
+        value=questionary.select(message,choices=available_actions).ask()
+        return value
+    else: 
+        return ''
     
     
     
