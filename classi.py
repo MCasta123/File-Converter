@@ -39,9 +39,14 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
             '.jpeg' : ImageFile,
             '.png' : ImageFile,
             '.heic' : ImageFile,
+            '.heif' : ImageFile,
             '.jpg' : ImageFile,
             '.mp4' : VideoFile,
-            '.mov' : VideoFile
+            '.mov' : VideoFile,
+            '.avi' : VideoFile,
+            '.mkv' : VideoFile,
+            '.hevc' : VideoFile,
+            '.h265' : VideoFile
         }
         return extension_map
 
