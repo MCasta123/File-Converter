@@ -558,22 +558,12 @@ class VideoFile(GenericFile):
                 'Compressione media' : 2,
                 'Compressione alta' : 3
             }
-            quality=create_menu(message='Scegli la qualità di ccompressione', dictio=available_quality)
-            '''
-            quality1='Compressione leggera'
-            quality2='Compressione media'
-            quality3='Compressione pesante'
-            list_of_quality=[]
-            list_of_quality.extend([quality1,quality2,quality3])
-            available_quality=[]
-            x=1 #valore da assegnare
-            for el in list_of_quality:
-                
-                available_quality.append(Choice(title=el,value=x))
-                x+=1
-            print('\n')
-            quality=questionary.select('Scegli la qualità di compressione',choices=available_quality).ask()
-            '''
+            quality=use_settings(category='video',option='video_compression_quality')
+            if quality:
+                inverted_available_quality= {v: k for k, v in available_quality.items()}
+                print(f'Dalle impostazioni è selezionata: {inverted_available_quality[quality]}')
+            else:
+                quality=create_menu(message='Scegli la qualità di ccompressione', dictio=available_quality)
             return {'quality' : quality}
         else:
             return {}
