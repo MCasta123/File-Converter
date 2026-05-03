@@ -278,5 +278,28 @@ def use_settings(category : str, option: str)->bool | str | int | float:
             return settings[category][option] 
         return False    
     return False
+
+def to_do_after_conversion(behaviour: int, files_paths: tuple | str)-> bool:
+    """
+    Function that execute the selected behaviour after the conversion of files
+    Args:
+        behaviour: indicate the selected beahviour
+        files_path: tuple or string with the paths of converted files
+    Returns:
+        True if everythings goes well
+    """
+    if behaviour==1: #elimina tutti i file precedenti
+        for el in files_paths:
+            if os.path.exists(el):
+                os.remove(el)
+        return True
+    elif behaviour==2:
+        return True
+    elif behaviour==3:
+        return True
+    else:
+        return False
+        
+    
         
     
