@@ -18,6 +18,11 @@ except tomllib.TOMLDecodeError as e:
     sys.exit(1)
 if not os.path.exists(os.path.join(get_base_path(),'preferences.toml')): #se è il primo avvio, crea preferences.toml
     load_settings()
+if not os.path.exists(os.path.join(get_base_path(),'cancellation_log.json')): #se non esiste cancellation_log.json lo creo
+    directory_path=get_base_path()
+    cancellation_log_path=os.path.join(directory_path,'cancellation_log.json')
+    with open(cancellation_log_path,'x') as f:
+            pass
 while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
     print(f'{'='*100}')
     initial_actions={
