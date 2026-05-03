@@ -450,7 +450,7 @@ class ImageFile(GenericFile):
                 with Image.open(self.path) as img:
                     if img.mode != "RGB":
                         img = img.convert("RGB")
-                    quality=self.config['image']['compression_quality']
+                    quality=self.config['image']['compress_quality']
                     img.save(output_path, "JPEG", optimize=True, quality=quality)
             else:
                 with Image.open(self.path) as img:
@@ -464,13 +464,15 @@ class ImageFile(GenericFile):
             print(f'Errore nel salvataggio del file {e}')
 
 
-    def _convert_to_JPG(self, directory_path: str) -> None:
+    def _convert_to_JPG(self, directory_path: str) -> None | str:
         """
         Converts the image to JPEG format.
 
         Args:
             directory_path: Output folder path. Empty string if saving via dialog.
-
+        Returns:
+            None in general
+            str : path of file already jpg
         Raises:
             UnidentifiedImageError: If the image file is corrupted or unrecognized.
             OSError: If the output file cannot be written.
@@ -478,7 +480,7 @@ class ImageFile(GenericFile):
         extension=Path(self.path).suffix.lower()
         if extension in ['.jpg', '.jpeg']:
             print(f'L\'immagine {os.path.basename(self.path)} è già un jpg')
-            return
+            return self.path
         if directory_path=='': #un file solo
             output_path = save_as(".jpg")
         else:   #gestione di più file
@@ -568,13 +570,15 @@ class VideoFile(GenericFile):
         else:
             return {}
 
-    def _convert_to_mp4(self, directory_path: str) -> None:
+    def _convert_to_mp4(self, directory_path: str) -> None | str:
         """
         Converts the video file to MP4 format using ffmpeg.
 
         Args:
             directory_path: Output folder path. Empty string if saving via dialog.
-
+         Returns:
+            None in general
+            str : path of file already jpg
         Raises:
             subprocess.CalledProcessError: If ffmpeg returns an error.
             FileNotFoundError: If the ffmpeg executable is not found.
@@ -583,7 +587,7 @@ class VideoFile(GenericFile):
         extension=Path(self.path).suffix.lower()
         if extension=='.mp4':
             print(f'Il file {os.path.basename(self.path)} è già mp4')
-            return
+            return self.path
         if directory_path=='': #un file solo
             output_path = save_as(".mp4")
         else:   #gestione di più file
