@@ -341,6 +341,52 @@ def write_cancellation_log(list_of_path : list=None)->bool:
     return True
         
         
+def load_cancellation_log()-> bool:
+    """
+    Function to delete the files saved in cancellation_log.json
+    Returns:
+        boolean value that indicate if cancellation on files goes well
+    Raises:
+        FileNotFoundError: if cancellation_log.json is not found
+    """
     
+    cancelled=True
+    cancellation_log_path=os.path.join(get_base_path(),'cancellation_log.json')
+    try:
+        with open(cancellation_log_path, "r") as file:
+            data=json.load(file)
+    except FileNotFoundError as e:
+            print(f'Cancellation_log.json non trovato: {e}')
+            return 
+
+    print('Questa è la lista delle conversioni fatte dove non sono stati cancellati i files vecchi:')
+    conversation_choosed=create_menu(message='Scegli di quale conversione cancellare i files',dictio=data,return_the_keys=True)
+    if conversation_choosed:
+        all_paths_exist=True #se diventa false levo dal dizionario la conversione ma stampo che i file devono essere rimossi manualmente
+        for path in data[conversation_choosed]:
+            if not os.path.exists(path):
+                print('Un file è stato spostato o eliminato manualmente, impossibile completare l\'operazione')
+                print('è necessario cancellare manualmente i files vecchi')
+                cancelled=False
+                all_paths_exist=False 
+                break
+        if all_paths_exist:
+            for path in data[conversation_choosed]:
+                os.remove(path)
+
+        del data[conversation_choosed]  #cancello la conversione relativa ai file cancellati
+        try:    #riscrivo il file json
+            with open(cancellation_log_path,'w') as file:
+                json.dump(data,file,indent=4)
+        except FileNotFoundError as e:
+            print(f'Cancellation_log.json non trovato: {e}')
+            return False
+        if cancelled:
+            print('I files vecchi sono stati eliminati correttamente')
+        return cancelled
+    else:
+        print('Non ci sono conversioni in sospeso')
+        return False
+       
         
     
