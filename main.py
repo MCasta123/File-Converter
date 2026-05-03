@@ -102,7 +102,7 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
             possible_changes_alias={
                 'pdf_compression_quality' : 'Scegli la qualità di compressione dei files pdf',
                 'video_compression_quality' : 'Scegli la qualità di compressione dei video',
-                'after conversion' : 'Scegli cosa fa il convertitore dopo aver convertito i files'
+                'after_conversion' : 'Scegli cosa fa il convertitore dopo aver convertito i files'
             }
             selected_change=create_menu(dictio=possible_changes, message='Cosa vuoi modificare? ',return_the_keys=True, dictionary_of_alias=possible_changes_alias)
         if category=='pdf':   #impostazioni pdf
@@ -134,7 +134,16 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                 continue
             
         elif category=='general': #impostazioni generali
-            pass
+            if selected_change=='after_conversion':
+                action_to_do_after_conversion={
+                    'Converti ed elimina tutti i files precedenti' : 1,
+                    'Converti e mantieni tutti i files' : 2,        #default
+                    'Converti e salva i files precedenti per cancellari in seguito dopo averli controllati con un unico click' : 3
+                }
+                after_conversion=create_menu(dictio=action_to_do_after_conversion,message='Seleziona cosa vuoi fare con i file originari dopo che sono stati convertiti')
+                modify_settings(category=category,selected_change={selected_change : after_conversion})
+            else:
+                continue
         
         else:   #torna alla home
             continue
