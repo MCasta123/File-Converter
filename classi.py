@@ -5,7 +5,7 @@ from pathlib import Path  #libreria importata per estrarre facilmente l' extensi
 from abc import ABC, abstractmethod
 import subprocess
 import pikepdf
-from funzioni import save_as, get_base_path, create_menu
+from funzioni import save_as, get_base_path, create_menu , use_settings
 import platform
 
 
@@ -151,11 +151,16 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
     def add_extra_parameters(self, choice: int, file_list: list | None = None) -> dict:
         if choice==2:
             available_quality={
-                'Qualità alta, compressione bassa' : 1,
-                'Qualità media, compressione media' : 2,
-                'Qualità bassa, compressione alta' : 3
-            }
-            quality=create_menu(message='Scegli la qualità di compressione', dictio=available_quality)
+                    'Qualità alta, compressione bassa' : 1,
+                    'Qualità media, compressione media' : 2,
+                    'Qualità bassa, compressione alta' : 3
+                }
+            quality=use_settings(category='pdf',option='pdf_compression_quality')
+            if quality:
+                inverted_available_quality= {v: k for k, v in available_quality.items()}
+                print(f'Dalle impostazioni è selezionata: {inverted_available_quality[quality]}')
+            else:
+                quality=create_menu(message='Scegli la qualità di compressione', dictio=available_quality)
             return {'quality' : quality}
         elif choice==3: #qui non si aggiunge parametri extra ma si usa la funzione per chiamarne un altra senza fare il ciclo for del main
             if file_list:   #serve per quando si passa più file ma se ne vuole solo uno in output, quindi la funzione unisce i file in uno
