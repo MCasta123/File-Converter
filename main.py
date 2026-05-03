@@ -1,4 +1,4 @@
-from funzioni import choose_directory,choose_file, get_base_path,load_settings,modify_settings, create_menu, use_settings, to_do_after_conversion, write_cancellation_log
+from funzioni import choose_directory,choose_file, get_base_path,load_settings,modify_settings, create_menu, use_settings, to_do_after_conversion, write_cancellation_log,load_cancellation_log
 from classi import GenericFile, check_homogeneity
 import traceback
 import tomllib
@@ -25,6 +25,7 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
     initial_actions={
         'Inizia a convertire' : 1,
         'Impostazioni' : 2,
+        'Accedi alle conversioni sospese' : 3,
         'Esci' : 0
     }
     action_choice=create_menu(message='Scegli cosa vuoi fare', dictio=initial_actions)
@@ -72,7 +73,6 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                         behaviour_after_conversion=create_menu(dictio=action_to_do_after_conversion,message='Seleziona cosa vuoi fare con i file originari dopo che sono stati convertiti')
                         print('Fatto')
                     to_do_after_conversion(behaviour=behaviour_after_conversion,files_paths=converted_files)
-                
                 except Exception as e:
                     print(f"ERRORE TECNICO: {e}")
                     traceback.print_exc()  # stampa il traceback completo
@@ -80,9 +80,17 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
 
                 print('\n')
                 message='Cosa vuoi fare?'
-                check=create_menu(message=message,dictio={'Torna alla home' : 1, 'Esci' : 0})
-                if check==0:
+                if behaviour_after_conversion==3: #se l'utente ha scelto di controllare i file nuovi per poi eliminare i vecchi stampa questo menu
+                    check=create_menu(message=message,dictio={'Ho controllato i files nuovi. Cancella i vecchi': 2,'Non memorizzarli, questi files sono sicuro di tenerli' : 3 ,'Torna alla home' : 1, 'Esci' : 0})
+                else:   #altrimenti stampa questo
+                    check=create_menu(message=message,dictio={'Torna alla home' : 1, 'Esci' : 0})
+                if check==0:    #termina programma
                     break
+                elif check==2:  #chiama funzione che cancella i files che avevamo memorizzato
+                    load_cancellation_log()
+                elif check==3: #se l'utente è sicuro di tenere quei file posso non salvarli
+                    pass
+                    #load_cancellation_log()   #chiamo funzione con il parametro false in modo che semplicemente leva dal file json questa conversione
 
             else:
                 print('ERRORE')
@@ -154,7 +162,7 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                 action_to_do_after_conversion={
                     'Converti ed elimina tutti i files precedenti' : 1,
                     'Converti e mantieni tutti i files' : 2,        #default
-                    'Converti e salva i files precedenti per cancellari in seguito dopo averli controllati con un unico click' : 3
+                    'Converti e salva i files precedenti per cancellari in seguito dopo averli controllati' : 3
                 }
                 after_conversion=create_menu(dictio=action_to_do_after_conversion,message='Seleziona cosa vuoi fare con i file originari dopo che sono stati convertiti')
                 modify_settings(category=category,selected_change={selected_change : after_conversion})
@@ -163,7 +171,14 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
         
         else:   #torna alla home
             continue
-    
+    elif action_choice==3:
+        settings=load_settings()
+        if settings['general']['after_conversion']!=3:
+            print('Questa sezione è disponibile solo se si abilita l\'impostazione di tenere in memoria i files dopo la conversione per cancellarli in seguito')
+            print('Per farlo:')
+            print('Torna alla home -> Impostazioni -> generali -> Scegli cosa fa il convertitore dopo aver convertito i files -> Converti e salva i files precedenti per cancellari in seguito dopo averli controllati')
+        else:
+            load_cancellation_log()
     else:
         break
     
