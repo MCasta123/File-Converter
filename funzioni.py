@@ -157,19 +157,19 @@ def load_settings() -> dict :
             sys.exit(1)
     
     else:   #si crea il file
-        settings="""
-        #impostazioni
-        [pdf]
-        pdf_compression_quality=""
-        
-        [image]
-        
-        [video]
-        video_compression_quality=""
-        
-        [general]
-        after_conversion=""
-        """
+        settings = """\
+# impostazioni utente
+[pdf]
+pdf_compression_quality = ""
+
+[image]
+
+[video]
+video_compression_quality= ""
+
+[general]
+after_conversion=""
+"""
         with open(preferences_path,'w') as f:
             f.write(settings)
             
@@ -256,6 +256,27 @@ def create_menu(dictio : dict, message : str | None, dictionary_of_alias : dict 
     else: 
         return ''
     
+def use_settings(category : str, option: str)->bool | str | int | float:
+    """
+    Function to use settings contained in preferences.toml
+    Args:
+        category: indicate the category of change, it's the key of dictionary returned by settings=load_settings()
+        option: indicate the specific setting, it's the key of sub-dictionary returned by load_settings() (settings[category])
+    Returns:
+        False if we can find the option or file preferences.toml
+        The value of the selected option
+    """
     
     
+    preferences_path=os.path.join(get_base_path(),'preferences.toml')
+    if not os.path.exists(preferences_path):
+        return False
+    
+    settings=load_settings()
+    if category in settings:
+        if option in settings[category]:
+            return settings[category][option] 
+        return False    
+    return False
+        
     
