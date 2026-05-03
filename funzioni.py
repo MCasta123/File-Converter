@@ -9,6 +9,8 @@ import tomllib
 import tomlkit
 import questionary
 from questionary import Choice
+import datetime
+import json
 
 
 ################################################################################################################################
@@ -279,7 +281,7 @@ def use_settings(category : str, option: str)->bool | str | int | float:
         return False    
     return False
 
-def to_do_after_conversion(behaviour: int, files_paths: tuple | str)-> bool:
+def to_do_after_conversion(behaviour: int, files_paths: list | str)-> bool:
     """
     Function that execute the selected behaviour after the conversion of files
     Args:
@@ -293,12 +295,51 @@ def to_do_after_conversion(behaviour: int, files_paths: tuple | str)-> bool:
             if os.path.exists(el):
                 os.remove(el)
         return True
-    elif behaviour==2:
+    elif behaviour==2:  #mantieni i files precedenti (default)
         return True
-    elif behaviour==3:
-        return True
+    elif behaviour==3:  #salva i files e cancellali in seguito
+        write_cancellation_log(files_paths)
     else:
         return False
+    
+def write_cancellation_log(list_of_path : list=None)->bool:
+    """
+    Function to write in file cancellation_log.json
+    Args:
+        list_of_path: list of files_path to write
+    Return:
+        A boolean value
+    Raises:
+        FileNotFoundError : if cancellation_log.json is not found
+    """
+    
+    adesso = datetime.datetime.now()    #ottengo data e ora attuali
+    testo = adesso.strftime("Conversione del giorno %d/%m/%Y alle ore %H:%M:%S")   #titolo di una conversione
+    cancellation_log_path=os.path.join(get_base_path(),'cancellation_log.json')
+    if not os.path.exists(cancellation_log_path):
+        try:
+            with open(cancellation_log_path, "w") as file:
+                json.dump({}, file, indent=4)
+                return True
+        except FileNotFoundError as e:
+            print(f'Cancellation_log.json non trovato: {e}')
+            return False
+    else:
+        try:
+            with open(cancellation_log_path, "r") as file:
+                data=json.load(file)
+        except FileNotFoundError as e:
+            print(f'Cancellation_log.json non trovato: {e}')
+            return False
+        data[testo]=list_of_path
+        try:
+            with open(cancellation_log_path,'w') as file:
+                json.dump(data,file,indent=4)
+        except FileNotFoundError as e:
+            print(f'Cancellation_log.json non trovato: {e}')
+            return False
+    return True
+        
         
     
         

@@ -1,4 +1,4 @@
-from funzioni import choose_directory,choose_file, get_base_path,load_settings,modify_settings, create_menu, use_settings, to_do_after_conversion
+from funzioni import choose_directory,choose_file, get_base_path,load_settings,modify_settings, create_menu, use_settings, to_do_after_conversion, write_cancellation_log
 from classi import GenericFile, check_homogeneity
 import traceback
 import tomllib
@@ -19,10 +19,7 @@ except tomllib.TOMLDecodeError as e:
 if not os.path.exists(os.path.join(get_base_path(),'preferences.toml')): #se è il primo avvio, crea preferences.toml
     load_settings()
 if not os.path.exists(os.path.join(get_base_path(),'cancellation_log.json')): #se non esiste cancellation_log.json lo creo
-    directory_path=get_base_path()
-    cancellation_log_path=os.path.join(directory_path,'cancellation_log.json')
-    with open(cancellation_log_path,'x') as f:
-            pass
+    write_cancellation_log()
 while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
     print(f'{'='*100}')
     initial_actions={
