@@ -1,4 +1,4 @@
-from funzioni import choose_directory,choose_file, get_base_path,load_settings,modify_settings, create_menu
+from funzioni import choose_directory,choose_file, get_base_path,load_settings,modify_settings, create_menu, use_settings, to_do_after_conversion
 from classi import GenericFile, check_homogeneity
 import traceback
 import tomllib
@@ -52,16 +52,30 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                                     break
                                 else:
                                     continue
-                        
+                        converted_files=list(files_paths)
                         for x in files_paths:
                             chosen_file=GenericFile.create_from_path(x, config=config)
-                            chosen_file.choose_action(choice=choice,directory_path=directory_path,extra_parameters=extra_parameters)
-
+                            returned_path=chosen_file.choose_action(choice=choice,directory_path=directory_path,extra_parameters=extra_parameters)
+                            if returned_path: #se entro nell' if vuol dire che choose_action ha restituito un path da rimouivere dalla lista dei file convertiti
+                                if returned_path in converted_files:
+                                    converted_files.remove(returned_path)
+                    
+                    behaviour_after_conversion=use_settings(category='general',option='after_conversion')
+                    if not behaviour_after_conversion:
+                        action_to_do_after_conversion={
+                            'Converti ed elimina tutti i files precedenti' : 1,
+                            'Converti e mantieni tutti i files' : 2,        #default
+                            'Converti e salva i files precedenti per cancellari in seguito dopo averli controllati con un unico click' : 3
+                        }
+                        behaviour_after_conversion=create_menu(dictio=action_to_do_after_conversion,message='Seleziona cosa vuoi fare con i file originari dopo che sono stati convertiti')
+                        print('Fatto')
+                    to_do_after_conversion(behaviour=behaviour_after_conversion,files_paths=converted_files)
+                
                 except Exception as e:
                     print(f"ERRORE TECNICO: {e}")
                     traceback.print_exc()  # stampa il traceback completo
-                    
-                
+                  
+
                 print('\n')
                 message='Cosa vuoi fare?'
                 check=create_menu(message=message,dictio={'Torna alla home' : 1, 'Esci' : 0})
