@@ -255,6 +255,8 @@ def create_menu(dictio : dict, message : str | None, dictionary_of_alias : dict 
             else:
                 available_actions.append(Choice(title=element,value=dictio[el]))
         value=questionary.select(message,choices=available_actions,instruction=" ",qmark="",style=theme).ask()
+        if value is None:
+            sys.exit(0)
         return value
     else: 
         return ''
@@ -278,18 +280,23 @@ def use_settings(category : str, option: str)->bool | str | int | float:
     settings=load_settings()
     if category in settings:
         if option in settings[category]:
-            return settings[category][option] 
+            value = settings[category][option]
+            if value == "" or value is None:
+                return False 
+            return value
         return False    
     return False
 
-def to_do_after_conversion(behaviour: int, files_paths: list | str)-> bool:
+def to_do_after_conversion(behaviour: int, files_paths: list | str)-> bool | str:
     """
     Function that execute the selected behaviour after the conversion of files
     Args:
         behaviour: indicate the selected beahviour
         files_path: tuple or string with the paths of converted files
     Returns:
-        True if everythings goes well
+        str: the conversion key if behaviour is 3 and files were saved successfully.
+        True: if the operation completed successfully.
+        False: if an invalid behaviour was provided or an error occurred.
     """
     if behaviour==1: #elimina tutti i file precedenti
         for el in files_paths:
@@ -299,58 +306,69 @@ def to_do_after_conversion(behaviour: int, files_paths: list | str)-> bool:
     elif behaviour==2:  #mantieni i files precedenti (default)
         return True
     elif behaviour==3:  #salva i files e cancellali in seguito
-        write_cancellation_log(files_paths)
+        return write_cancellation_log(files_paths)
+        
     else:
         return False
     
-def write_cancellation_log(list_of_path : list=None)->bool:
+def write_cancellation_log(list_of_path : list | None =None)->bool | str:
     """
     Function to write in file cancellation_log.json
     Args:
         list_of_path: list of files_path to write
     Return:
-        A boolean value
+        str: the key of the conversion entry if files were written successfully.
+        True: if the file was created successfully without writing any conversion.
+        False: if an error occurred.
     Raises:
-        FileNotFoundError : if cancellation_log.json is not found
+        OSError : if cancellation_log.json is not found
     """
     
     adesso = datetime.datetime.now()    #ottengo data e ora attuali
-    testo = adesso.strftime("Conversione del giorno %d/%m/%Y alle ore %H:%M:%S")   #titolo di una conversione
+    text = adesso.strftime("Conversione del giorno %d/%m/%Y alle ore %H:%M:%S")   #titolo di una conversione
     cancellation_log_path=os.path.join(get_base_path(),'cancellation_log.json')
     if not os.path.exists(cancellation_log_path):
         try:
             with open(cancellation_log_path, "w") as file:
                 json.dump({'Torna alla home' : 'Torna alla home'}, file, indent=4)
                 return True
-        except FileNotFoundError as e:
-            print(f'Cancellation_log.json non trovato: {e}')
+        except OSError as e:
+            print(f'Errore nel file cancellation_log.json: {e}')
             return False
     else:
         try:
             with open(cancellation_log_path, "r") as file:
                 data=json.load(file)
-        except FileNotFoundError as e:
-            print(f'Cancellation_log.json non trovato: {e}')
+        except OSError as e:
+            print(f'Errore nel file cancellation_log.json: {e}')
             return False
-        data[testo]=list_of_path
-        try:
-            with open(cancellation_log_path,'w') as file:
-                json.dump(data,file,indent=4)
-        except FileNotFoundError as e:
-            print(f'Cancellation_log.json non trovato: {e}')
-            return False
+        if list_of_path:
+            data[text]=list_of_path
+            try:
+                with open(cancellation_log_path,'w') as file:
+                    json.dump(data,file,indent=4)
+            except OSError as e:
+                print(f'Errore nel file cancellation_log.json:{e}')
+                return False
+        return text
     return True
         
         
-def load_cancellation_log(delete_last_element: bool =False)-> bool:
+def load_cancellation_log(key_to_delete: str | None = None, delete_files: bool =True)-> bool:
     """
-    Function to delete the files saved in cancellation_log.json
+    Function to delete the files saved in cancellation_log.json.
     Args:
-        delete_last_element: if true this function only delete the last item from cancellation_log.json
+        key_to_delete: if provided, deletes only the entry with this key from the log
+                    without prompting the user. If None, shows the full log and
+                    lets the user choose which conversion to delete.
+        delete_files: if True, physically deletes the files from disk before removing
+                    the entry from the log. If False, only removes the entry from
+                    the log without touching the files. Default is True.
     Returns:
-        boolean value that indicate if cancellation on files goes well
+        True if the operation completed successfully.
+        False if an error occurred or no conversions are pending.
     Raises:
-        FileNotFoundError: if cancellation_log.json is not found
+        OSError: if cancellation_log.json cannot be read or written.
     """
     
     cancelled=True
@@ -358,24 +376,29 @@ def load_cancellation_log(delete_last_element: bool =False)-> bool:
     try:
         with open(cancellation_log_path, "r") as file:
             data=json.load(file)
-    except FileNotFoundError as e:
-            print(f'Cancellation_log.json non trovato: {e}')
-            return 
-    if delete_last_element:
-        data.popitem()
-        try:    #riscrivo il file json
-            with open(cancellation_log_path,'w') as file:
-                json.dump(data,file,indent=4)
-                return False
-        except FileNotFoundError as e:
+    except OSError as e:
             print(f'Cancellation_log.json non trovato: {e}')
             return False
+    if key_to_delete:
+            if key_to_delete in data:
+                if delete_files: #elimina i files se richiesto
+                    for path in data[key_to_delete]:
+                        if os.path.exists(path):
+                            os.remove(path)
+                del data[key_to_delete]
+                try:
+                    with open(cancellation_log_path, 'w') as file:
+                        json.dump(data, file, indent=4)
+                    return True
+                except OSError as e:
+                    print(f'Errore nel file cancellation_log.json: {e}')
+                    return False
         
     print('Questa è la lista delle conversioni fatte dove non sono stati cancellati i files vecchi:')
-    conversation_choosed=create_menu(message='Scegli di quale conversione cancellare i files',dictio=data,return_the_keys=True)
-    if conversation_choosed and conversation_choosed!='Torna alla home':
+    conversion_choosed=create_menu(message='Scegli di quale conversione cancellare i files',dictio=data,return_the_keys=True)
+    if conversion_choosed and conversion_choosed!='Torna alla home':
         all_paths_exist=True #se diventa false levo dal dizionario la conversione ma stampo che i file devono essere rimossi manualmente
-        for path in data[conversation_choosed]:
+        for path in data[conversion_choosed]:
             if not os.path.exists(path):
                 print('Un file è stato spostato o eliminato manualmente, impossibile completare l\'operazione')
                 print('è necessario cancellare manualmente i files vecchi')
@@ -383,10 +406,10 @@ def load_cancellation_log(delete_last_element: bool =False)-> bool:
                 all_paths_exist=False 
                 break
         if all_paths_exist:
-            for path in data[conversation_choosed]:
+            for path in data[conversion_choosed]:
                 os.remove(path)
 
-        del data[conversation_choosed]  #cancello la conversione relativa ai file cancellati
+        del data[conversion_choosed]  #cancello la conversione relativa ai file cancellati
         try:    #riscrivo il file json
             with open(cancellation_log_path,'w') as file:
                 json.dump(data,file,indent=4)
@@ -396,7 +419,7 @@ def load_cancellation_log(delete_last_element: bool =False)-> bool:
         if cancelled:
             print('I files vecchi sono stati eliminati correttamente')
         return cancelled
-    elif conversation_choosed=='Torna alla home':
+    elif conversion_choosed=='Torna alla home':
         return True
     else:
         print('Non ci sono conversioni in sospeso')
@@ -424,7 +447,13 @@ def get_video_codec(file_path : str)-> str |None:
         result = subprocess.run(command, capture_output=True, text=True, check=True)
         codec = result.stdout.strip()
         return codec
-    except Exception as e:
-        print(f"⚠️ Impossibile leggere il codec del file: {e}")
-        return None       
+    except subprocess.CalledProcessError as e:
+        print(f"Errore durante la lettura del codec: {e}")
+        return None
+    except FileNotFoundError:
+        print("ffprobe non trovato — assicurarsi che ffmpeg sia installato correttamente")
+        return None
+    except OSError as e:
+        print(f"Errore di sistema durante la lettura del codec: {e}")
+        return None     
     

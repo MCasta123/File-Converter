@@ -43,6 +43,7 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                     extra_parameters=temp_object.add_extra_parameters(choice=choice,file_list=files_paths)
                     if 'stop' in extra_parameters:
                         if extra_parameters['stop']==True:
+                            behaviour_after_conversion=None
                             pass
                     else:
                         if len(files_paths)>1:
@@ -63,16 +64,16 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                                 if returned_path in converted_files:
                                     converted_files.remove(returned_path)
                     
-                    behaviour_after_conversion=use_settings(category='general',option='after_conversion')
-                    if not behaviour_after_conversion:
-                        action_to_do_after_conversion={
-                            'Converti ed elimina tutti i files precedenti' : 1,
-                            'Converti e mantieni tutti i files' : 2,        #default
-                            'Converti e salva i files precedenti per cancellari in seguito dopo averli controllati con un unico click' : 3
-                        }
-                        behaviour_after_conversion=create_menu(dictio=action_to_do_after_conversion,message='Seleziona cosa vuoi fare con i file originari dopo che sono stati convertiti')
-                        print('Fatto')
-                    to_do_after_conversion(behaviour=behaviour_after_conversion,files_paths=converted_files)
+                        behaviour_after_conversion=use_settings(category='general',option='after_conversion')
+                        if not behaviour_after_conversion:
+                            action_to_do_after_conversion={
+                                'Converti ed elimina tutti i files precedenti' : 1,
+                                'Converti e mantieni tutti i files' : 2,        #default
+                                'Converti e salva i files precedenti per cancellari in seguito dopo averli controllati con un unico click' : 3
+                            }
+                            behaviour_after_conversion=create_menu(dictio=action_to_do_after_conversion,message='Seleziona cosa vuoi fare con i file originari dopo che sono stati convertiti')
+                            print('Fatto')
+                        results=to_do_after_conversion(behaviour=behaviour_after_conversion,files_paths=converted_files)
                 except Exception as e:
                     print(f"ERRORE TECNICO: {e}")
                     traceback.print_exc()  # stampa il traceback completo
@@ -87,9 +88,11 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                 if check==0:    #termina programma
                     break
                 elif check==2:  #chiama funzione che cancella i files che avevamo memorizzato
-                    load_cancellation_log()
+                    if isinstance(results, str):
+                        load_cancellation_log(key_to_delete=results, delete_files=True)
                 elif check==3: #se l'utente è sicuro di tenere quei file posso non salvarli
-                    load_cancellation_log(delete_last_element=True)   #chiamo funzione con il parametro false in modo che semplicemente leva dal file json questa conversione
+                        if isinstance(results, str):
+                            load_cancellation_log(key_to_delete=results, delete_files=False)   #chiamo funzione con il parametro false in modo che semplicemente leva dal file json questa conversione
 
             else:
                 print('ERRORE')
@@ -119,6 +122,7 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
         }
         category=create_menu(dictio=possible_actions, message='Che tipo di impostazioni vuoi modificare')
         settings=load_settings()
+        selected_change=None
         if category in settings:
             
             possible_changes=dict(settings[category])
