@@ -5,7 +5,7 @@ from pathlib import Path  #libreria importata per estrarre facilmente l' extensi
 from abc import ABC, abstractmethod
 import subprocess
 import pikepdf
-from funzioni import save_as, get_base_path, create_menu , use_settings
+from funzioni import save_as, get_base_path, create_menu , use_settings , get_video_codec
 import platform
 
 
@@ -585,7 +585,7 @@ class VideoFile(GenericFile):
             OSError: If the output file cannot be written.
         """
         extension=Path(self.path).suffix.lower()
-        if extension=='.mp4':
+        if extension=='.mp4' and get_video_codec(self.path)=="h264":
             print(f'Il file {os.path.basename(self.path)} è già mp4')
             return self.path
         if directory_path=='': #un file solo

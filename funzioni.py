@@ -415,5 +415,29 @@ def load_cancellation_log(delete_last_element: bool =False)-> bool:
         print('Non ci sono conversioni in sospeso')
         return False
        
-        
+
+
+def get_video_codec(file_path : str)-> str |None:
+    """
+    Function to read a video file and extract codec 
+    Args:
+        file_path : it's the path of video file
+    """
+    command = [     #comando che chiama ffprobe
+        "ffprobe",
+        "-v", "error",                          
+        "-select_streams", "v:0",                
+        "-show_entries", "stream=codec_name",    
+        "-of", "default=noprint_wrappers=1:nokey=1", 
+        file_path
+    ]
+    
+    try:
+
+        result = subprocess.run(command, capture_output=True, text=True, check=True)
+        codec = result.stdout.strip()
+        return codec
+    except Exception as e:
+        print(f"⚠️ Impossibile leggere il codec del file: {e}")
+        return None       
     
