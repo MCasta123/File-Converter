@@ -5,8 +5,9 @@ from pathlib import Path  #libreria importata per estrarre facilmente l' extensi
 from abc import ABC, abstractmethod
 import subprocess
 import pikepdf
-from funzioni import save_as, get_base_path
+from funzioni import save_as, get_base_path, create_menu , use_settings , get_video_codec
 import platform
+
 
 
 # Inizializza il plugin per leggere i file HEIC (Apple)
@@ -37,9 +38,14 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
             '.jpeg' : ImageFile,
             '.png' : ImageFile,
             '.heic' : ImageFile,
+            '.heif' : ImageFile,
             '.jpg' : ImageFile,
             '.mp4' : VideoFile,
-            '.mov' : VideoFile
+            '.mov' : VideoFile,
+            '.avi' : VideoFile,
+            '.mkv' : VideoFile,
+            '.hevc' : VideoFile,
+            '.h265' : VideoFile
         }
         return extension_map
 
@@ -90,8 +96,8 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
         pass
 
     @abstractmethod
-    def get_available_actions(self) -> None:
-        """Prints the list of available actions for this file type."""
+    def get_available_actions(self) -> dict:
+        """Return a dictionary where keys are all the available actions for this type of file, values indicate that action in this program"""
         pass
 
 #############################################################################################################################
@@ -113,11 +119,13 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
         else:
             self.gs_exe = "gs"  # trovato nel PATH di sistema)
 
-    def get_available_actions(self) -> None:
-        print('Le azioni disponibili sono: \n')
-        print('---->Per convertire il pdf in pdf/A premere 1')
-        print('---->Per comprimere il pdf premere 2')
-        print('---->Per unire i pdf premere 3')
+    def get_available_actions(self) -> dict:
+        available_actions={
+            'Converti il pdf in pdf/A' : 1,
+            'Comprimi pdf' : 2,
+            'Unisci più pdf' : 3
+        }
+        return available_actions
 
     def choose_action(self, choice: int, directory_path: str = '', extra_parameters: dict | None = None) -> None:
         if extra_parameters is None:
@@ -142,16 +150,17 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
 
     def add_extra_parameters(self, choice: int, file_list: list | None = None) -> dict:
         if choice==2:
-            print('Scegli la qualità di compressione: \n')
-            print('----->Premere 1 per qualità alta, compressione bassa')
-            print('----->Premere 2 per qualità media, compressione media')
-            print('----->Premere 3 per qualità bassa, compressione alta')
-            while True:
-                try:
-                    quality = int(input())
-                    break  # ← uscita dal loop solo se la conversione è andata a buon fine
-                except ValueError:
-                    print('Inserire un numero valido')
+            available_quality={
+                    'Qualità alta, compressione bassa' : 1,
+                    'Qualità media, compressione media' : 2,
+                    'Qualità bassa, compressione alta' : 3
+                }
+            quality=use_settings(category='pdf',option='pdf_compression_quality')
+            if quality:
+                inverted_available_quality= {v: k for k, v in available_quality.items()}
+                print(f'Dalle impostazioni è selezionata: {inverted_available_quality[quality]}')
+            else:
+                quality=create_menu(message='Scegli la qualità di compressione', dictio=available_quality)
             return {'quality' : quality}
         elif choice==3: #qui non si aggiunge parametri extra ma si usa la funzione per chiamarne un altra senza fare il ciclo for del main
             if file_list:   #serve per quando si passa più file ma se ne vuole solo uno in output, quindi la funzione unisce i file in uno
@@ -335,11 +344,13 @@ class ImageFile(GenericFile):
         """
         super().__init__(file_path, config)
 
-    def get_available_actions(self) -> None:
-        print('Le azioni disponibili sono: \n')
-        print('---->Per convertire l\'immagini in pdf premere 1')
-        print('---->Per comprimere l\'immagine premere 2')
-        print('---->Per convertire l\'immagine in jpg premere 3')
+    def get_available_actions(self) -> dict:
+        available_actions={
+            'Converti una o più immagini in pdf' : 1,
+            'Comprimi immagine' : 2,
+            'Converti immagine in jpg' : 3
+        }
+        return available_actions
 
     def choose_action(self, choice: int, directory_path: str = '', extra_parameters: dict | None = None) -> None:
         if extra_parameters is None:
@@ -439,7 +450,7 @@ class ImageFile(GenericFile):
                 with Image.open(self.path) as img:
                     if img.mode != "RGB":
                         img = img.convert("RGB")
-                    quality=self.config['image']['compression_quality']
+                    quality=self.config['image']['compress_quality']
                     img.save(output_path, "JPEG", optimize=True, quality=quality)
             else:
                 with Image.open(self.path) as img:
@@ -453,13 +464,15 @@ class ImageFile(GenericFile):
             print(f'Errore nel salvataggio del file {e}')
 
 
-    def _convert_to_JPG(self, directory_path: str) -> None:
+    def _convert_to_JPG(self, directory_path: str) -> None | str:
         """
         Converts the image to JPEG format.
 
         Args:
             directory_path: Output folder path. Empty string if saving via dialog.
-
+        Returns:
+            None in general
+            str : path of file already jpg
         Raises:
             UnidentifiedImageError: If the image file is corrupted or unrecognized.
             OSError: If the output file cannot be written.
@@ -467,7 +480,7 @@ class ImageFile(GenericFile):
         extension=Path(self.path).suffix.lower()
         if extension in ['.jpg', '.jpeg']:
             print(f'L\'immagine {os.path.basename(self.path)} è già un jpg')
-            return
+            return self.path
         if directory_path=='': #un file solo
             output_path = save_as(".jpg")
         else:   #gestione di più file
@@ -532,43 +545,49 @@ class VideoFile(GenericFile):
             print('SCELTA NON GIUSTA')
             return
         
-    def get_available_actions(self) -> None:
-        print('Le azioni disponibili sono: \n')
-        print('---->Per convertire il video in mp4 premere 1')
-        print('---->Per comprimere il video premere 2')
+    def get_available_actions(self) -> dict:
+        available_actions={
+            'Converti video in mp4' : 1,
+            'Comprimi video' : 2
+        }
+        return available_actions
+
     
     def add_extra_parameters(self, choice: int, file_list: list | None = None) -> dict:
         if choice==2:
-            print('Selezionare la qualità di compressione:')
-            print('---->Premere 1 per compressione leggera: ')
-            print('---->Premere 2 per compressione media(riduce molto il peso ma qualità accettabile): ')
-            print('---->Premere 3 per compressione pesante(qualità bassa): ')
-            while True:
-                try:
-                    quality = int(input())
-                    break  # ← uscita dal loop solo se la conversione è andata a buon fine
-                except ValueError:
-                    print('Inserire un numero valido')
-            return {'quality': quality}
+            available_quality={
+                'Compressione bassa' : 1,
+                'Compressione media' : 2,
+                'Compressione alta' : 3
+            }
+            quality=use_settings(category='video',option='video_compression_quality')
+            if quality:
+                inverted_available_quality= {v: k for k, v in available_quality.items()}
+                print(f'Dalle impostazioni è selezionata: {inverted_available_quality[quality]}')
+            else:
+                quality=create_menu(message='Scegli la qualità di ccompressione', dictio=available_quality)
+            return {'quality' : quality}
         else:
             return {}
 
-    def _convert_to_mp4(self, directory_path: str) -> None:
+    def _convert_to_mp4(self, directory_path: str) -> None | str:
         """
         Converts the video file to MP4 format using ffmpeg.
 
         Args:
             directory_path: Output folder path. Empty string if saving via dialog.
-
+         Returns:
+            None in general
+            str : path of file already jpg
         Raises:
             subprocess.CalledProcessError: If ffmpeg returns an error.
             FileNotFoundError: If the ffmpeg executable is not found.
             OSError: If the output file cannot be written.
         """
         extension=Path(self.path).suffix.lower()
-        if extension=='.mp4':
+        if extension=='.mp4' and get_video_codec(self.path)=="h264":
             print(f'Il file {os.path.basename(self.path)} è già mp4')
-            return
+            return self.path
         if directory_path=='': #un file solo
             output_path = save_as(".mp4")
         else:   #gestione di più file
