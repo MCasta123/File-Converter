@@ -192,19 +192,17 @@ def modify_settings(category : str, selected_change: dict) -> bool:
         settings=load_settings()
         if category and selected_change and settings:
             key, value = next(iter(selected_change.items()))    #seleziono chiave e valore dell'unico elemento nel dizionario selected_change
-            category_list=list(settings.keys())
-            if category in category_list:
-                change_list=list(settings[category].keys())
-                if key in change_list:
+            if category in settings:
+                if key in settings[category]:
                     settings[category][key]=value
                     try:
-                        with open("preferences.toml", "w", encoding="utf-8") as f:
+                        with open(config_path, "w", encoding="utf-8") as f:
                             tomlkit.dump(settings, f)
                             return True
-                    except ValueError as e:
-                        print(f'Errore nella modifica : {e}') 
-        
-    except ValueError as e:
+                    except OSError as e:
+                        print(f'Errore nella scrittura del file: {e}')
+                        return False
+    except OSError as e:
         print(f'Errore nell\' apertura del file preferences.toml: {e}')
     return False
     
