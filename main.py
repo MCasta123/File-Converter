@@ -78,21 +78,21 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                     print(f"ERRORE TECNICO: {e}")
                     traceback.print_exc()  # stampa il traceback completo
                   
-
-                print('\n')
-                message='Cosa vuoi fare?'
-                if behaviour_after_conversion==3: #se l'utente ha scelto di controllare i file nuovi per poi eliminare i vecchi stampa questo menu
-                    check=create_menu(message=message,dictio={'Ho controllato i files nuovi. Cancella i vecchi': 2,'Non memorizzarli, questi files sono sicuro di tenerli' : 3 ,'Torna alla home' : 1, 'Esci' : 0})
-                else:   #altrimenti stampa questo
-                    check=create_menu(message=message,dictio={'Torna alla home' : 1, 'Esci' : 0})
-                if check==0:    #termina programma
-                    break
-                elif check==2:  #chiama funzione che cancella i files che avevamo memorizzato
-                    if isinstance(results, str):
-                        load_cancellation_log(key_to_delete=results, delete_files=True)
-                elif check==3: #se l'utente è sicuro di tenere quei file posso non salvarli
+                if converted_files:
+                    print('\n')
+                    message='Cosa vuoi fare?'
+                    if behaviour_after_conversion==3: #se l'utente ha scelto di controllare i file nuovi per poi eliminare i vecchi stampa questo menu
+                        check=create_menu(message=message,dictio={'Ho controllato i files nuovi. Cancella i vecchi': 2,'Non memorizzarli, questi files sono sicuro di tenerli' : 3 ,'Torna alla home' : 1, 'Esci' : 0})
+                    else:   #altrimenti stampa questo
+                        check=create_menu(message=message,dictio={'Torna alla home' : 1, 'Esci' : 0})
+                    if check==0:    #termina programma
+                        break
+                    elif check==2:  #chiama funzione che cancella i files che avevamo memorizzato
                         if isinstance(results, str):
-                            load_cancellation_log(key_to_delete=results, delete_files=False)   #chiamo funzione con il parametro false in modo che semplicemente leva dal file json questa conversione
+                            load_cancellation_log(key_to_delete=results, delete_files=True)
+                    elif check==3: #se l'utente è sicuro di tenere quei file posso non salvarli
+                            if isinstance(results, str):
+                                load_cancellation_log(key_to_delete=results, delete_files=False)   #chiamo funzione con il parametro false in modo che semplicemente leva dal file json questa conversione
 
             else:
                 print('ERRORE')
