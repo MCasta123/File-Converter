@@ -121,12 +121,13 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
         settings=load_settings()
         if category in settings:
             
-            possible_changes=settings[category]
-
+            possible_changes=dict(settings[category])
+            possible_changes['torna_alla_home']='torna_alla_home'
             possible_changes_alias={
                 'pdf_compression_quality' : 'Scegli la qualità di compressione dei files pdf',
                 'video_compression_quality' : 'Scegli la qualità di compressione dei video',
-                'after_conversion' : 'Scegli cosa fa il convertitore dopo aver convertito i files'
+                'after_conversion' : 'Scegli cosa fa il convertitore dopo aver convertito i files',
+                'torna_alla_home' : 'Torna alla home'
             }
             selected_change=create_menu(dictio=possible_changes, message='Cosa vuoi modificare? ',return_the_keys=True, dictionary_of_alias=possible_changes_alias)
         if category=='pdf':   #impostazioni pdf
@@ -143,7 +144,7 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                 continue
             
         elif category=='image': #impostazioni immagini
-            print('NESSUNA IMPOSTAZIONE DISPONIBILE PER LE IMMAGINI')
+            pass
         
         elif category=='video': #impostazioni video
             if selected_change=='video_compression_quality': #qui si cambia le impostazioni relative alla compressione dei video

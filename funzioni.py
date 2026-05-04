@@ -153,14 +153,13 @@ def load_settings() -> dict :
 # impostazioni utente
 [pdf]
 pdf_compression_quality = ""
-
 [image]
 
 [video]
 video_compression_quality= ""
-
 [general]
 after_conversion=""
+
 """
         with open(preferences_path,'w',encoding="utf-8") as f:
             f.write(settings)
