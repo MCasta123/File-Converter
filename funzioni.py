@@ -8,7 +8,7 @@ import subprocess
 import tomllib
 import tomlkit
 import questionary
-from questionary import Choice
+from questionary import Choice, Style
 import datetime
 import json
 
@@ -230,6 +230,20 @@ def create_menu(dictio : dict, message : str | None, dictionary_of_alias : dict 
     Returns:
         value : the value of the user' s input chosen from dictionary
     """
+    theme = Style([
+
+        ('qmark', 'fg:#ffcc00 bold'),       
+
+        ('question', 'fg:#ff9933 bold'),    
+
+        ('pointer', 'fg:#ffff66 bold'),     
+
+        ('highlighted', 'fg:#ffff66 bold'), 
+
+        ('text', 'fg:#cccccc'),             
+
+        ('instruction', 'fg:#808080 italic')
+    ])
     if dictio:
         list_of_actions=[]
         for action in dictio:
@@ -253,7 +267,7 @@ def create_menu(dictio : dict, message : str | None, dictionary_of_alias : dict 
                 available_actions.append(Choice(title=element,value=el))
             else:
                 available_actions.append(Choice(title=element,value=dictio[el]))
-        value=questionary.select(message,choices=available_actions).ask()
+        value=questionary.select(message,choices=available_actions,instruction=" ",qmark="",style=theme).ask()
         return value
     else: 
         return ''
