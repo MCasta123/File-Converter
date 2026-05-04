@@ -5,8 +5,8 @@ import shutil
 from tkinter import filedialog
 import sys
 import subprocess
-import tomllib
 import tomlkit
+from tomlkit.exceptions import TOMLKitError
 import questionary
 from questionary import Choice, Style
 import datetime
@@ -148,17 +148,7 @@ def load_settings() -> dict :
     directory_path=get_base_path()
     preferences_path=os.path.join(directory_path,'preferences.toml')
     
-    
-    if os.path.exists(preferences_path):    #file già creato
-        try:
-            with open(preferences_path, "r", encoding="utf-8") as f:
-                preferences=tomlkit.load(f)
-                return preferences
-        except tomllib.TOMLDecodeError as e:
-            print(f'Errore: preferences.toml non è valido: {e}')
-            sys.exit(1)
-    
-    else:   #si crea il file
+    if not os.path.exists(preferences_path):   #si crea il file
         settings = """\
 # impostazioni utente
 [pdf]
@@ -172,17 +162,17 @@ video_compression_quality= ""
 [general]
 after_conversion=""
 """
-        with open(preferences_path,'w') as f:
+        with open(preferences_path,'w',encoding="utf-8") as f:
             f.write(settings)
             
-        try:
-            with open(preferences_path, "r", encoding="utf-8") as f:
-                preferences=tomlkit.load(f)
-        except tomllib.TOMLDecodeError as e:
-            print(f'Errore: preferences.toml non è valido: {e}')
-            sys.exit(1)
-        
-        return preferences    
+    try:
+        with open(preferences_path, "r", encoding="utf-8") as f:
+            preferences=tomlkit.load(f)
+    except TOMLKitError as e:
+        print(f'Errore: preferences.toml non è valido: {e}')
+        sys.exit(1)
+    
+    return preferences    
             
 def modify_settings(category : str, selected_change: dict) -> bool:
     """
