@@ -114,6 +114,7 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
             'Impostazioni immagini' : 'image',
             'Impostazioni file video' : 'video',
             'Impostazioni generali' : 'general',
+            'Reset impostazioni' : 'reset',
             'Torna alla home' : ''
         }
         category=create_menu(dictio=possible_actions, message='Che tipo di impostazioni vuoi modificare')
@@ -167,7 +168,11 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                 modify_settings(category=category,selected_change={selected_change : after_conversion})
             else:
                 continue
-        
+        elif category=='reset': #reset impostazioni
+            preference_file_path=os.path.join(get_base_path(),'preferences.toml')
+            if os.path.exists(preference_file_path):
+                os.remove(preference_file_path)
+            load_settings()
         else:   #torna alla home
             continue
     elif action_choice==3:
