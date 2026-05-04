@@ -319,7 +319,7 @@ def write_cancellation_log(list_of_path : list=None)->bool:
     if not os.path.exists(cancellation_log_path):
         try:
             with open(cancellation_log_path, "w") as file:
-                json.dump({}, file, indent=4)
+                json.dump({'Torna alla home' : 'Torna alla home'}, file, indent=4)
                 return True
         except FileNotFoundError as e:
             print(f'Cancellation_log.json non trovato: {e}')
@@ -372,7 +372,7 @@ def load_cancellation_log(delete_last_element: bool =False)-> bool:
         
     print('Questa è la lista delle conversioni fatte dove non sono stati cancellati i files vecchi:')
     conversation_choosed=create_menu(message='Scegli di quale conversione cancellare i files',dictio=data,return_the_keys=True)
-    if conversation_choosed:
+    if conversation_choosed and conversation_choosed!='Torna alla home':
         all_paths_exist=True #se diventa false levo dal dizionario la conversione ma stampo che i file devono essere rimossi manualmente
         for path in data[conversation_choosed]:
             if not os.path.exists(path):
@@ -395,6 +395,8 @@ def load_cancellation_log(delete_last_element: bool =False)-> bool:
         if cancelled:
             print('I files vecchi sono stati eliminati correttamente')
         return cancelled
+    elif conversation_choosed=='Torna alla home':
+        return True
     else:
         print('Non ci sono conversioni in sospeso')
         return False
