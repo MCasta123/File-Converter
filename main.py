@@ -174,9 +174,13 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
             else:
                 continue
         elif category=='reset': #reset impostazioni
+            done=False
             preference_file_path=os.path.join(get_base_path(),'preferences.toml')
             if os.path.exists(preference_file_path):
                 os.remove(preference_file_path)
+                done=True
+            if done:
+                print('Impostazioni ripristinate')
             load_settings()
         else:   #torna alla home
             continue
