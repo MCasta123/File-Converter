@@ -341,9 +341,11 @@ def write_cancellation_log(list_of_path : list=None)->bool:
     return True
         
         
-def load_cancellation_log()-> bool:
+def load_cancellation_log(delete_last_element: bool =False)-> bool:
     """
     Function to delete the files saved in cancellation_log.json
+    Args:
+        delete_last_element: if true this function only delete the last item from cancellation_log.json
     Returns:
         boolean value that indicate if cancellation on files goes well
     Raises:
@@ -358,7 +360,16 @@ def load_cancellation_log()-> bool:
     except FileNotFoundError as e:
             print(f'Cancellation_log.json non trovato: {e}')
             return 
-
+    if delete_last_element:
+        data.popitem()
+        try:    #riscrivo il file json
+            with open(cancellation_log_path,'w') as file:
+                json.dump(data,file,indent=4)
+                return False
+        except FileNotFoundError as e:
+            print(f'Cancellation_log.json non trovato: {e}')
+            return False
+        
     print('Questa è la lista delle conversioni fatte dove non sono stati cancellati i files vecchi:')
     conversation_choosed=create_menu(message='Scegli di quale conversione cancellare i files',dictio=data,return_the_keys=True)
     if conversation_choosed:

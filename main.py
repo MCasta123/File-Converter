@@ -89,8 +89,7 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                 elif check==2:  #chiama funzione che cancella i files che avevamo memorizzato
                     load_cancellation_log()
                 elif check==3: #se l'utente è sicuro di tenere quei file posso non salvarli
-                    pass
-                    #load_cancellation_log()   #chiamo funzione con il parametro false in modo che semplicemente leva dal file json questa conversione
+                    load_cancellation_log(delete_last_element=True)   #chiamo funzione con il parametro false in modo che semplicemente leva dal file json questa conversione
 
             else:
                 print('ERRORE')
