@@ -21,7 +21,7 @@ if not os.path.exists(os.path.join(get_base_path(),'preferences.toml')): #se è 
 if not os.path.exists(os.path.join(get_base_path(),'cancellation_log.json')): #se non esiste cancellation_log.json lo creo
     write_cancellation_log()
 while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
-    print(f'{'='*100}')
+    print({'='*100})
     initial_actions={
         'Inizia a convertire' : 1,
         'Impostazioni' : 2,
