@@ -32,6 +32,7 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
     if action_choice==1:    #gestione selezione files
 
         files_paths=choose_file()   #permetto di scegliere uno o più file
+        converted_files=list(files_paths)
         if files_paths:    #controllo che non sia vuota la tupla
             if check_homogeneity(files_paths):   #controllo che tutti i file siano relativi alla stessa classe
                 try:
@@ -43,8 +44,10 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                     extra_parameters=temp_object.add_extra_parameters(choice=choice,file_list=files_paths)
                     if 'stop' in extra_parameters:
                         if extra_parameters['stop']==True:
+                            behaviour_after_conversion=""
+                        else:
                             behaviour_after_conversion=None
-                            pass
+                        pass
                     else:
                         if len(files_paths)>1:
                             directory_path=choose_directory()
@@ -56,24 +59,25 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
                                     break
                                 else:
                                     continue
-                        converted_files=list(files_paths)
+                        
                         for x in files_paths:
                             chosen_file=GenericFile.create_from_path(x, config=config)
                             returned_path=chosen_file.choose_action(choice=choice,directory_path=directory_path,extra_parameters=extra_parameters)
                             if returned_path: #se entro nell' if vuol dire che choose_action ha restituito un path da rimouivere dalla lista dei file convertiti
                                 if returned_path in converted_files:
                                     converted_files.remove(returned_path)
-                    
                         behaviour_after_conversion=use_settings(category='general',option='after_conversion')
-                        if not behaviour_after_conversion:
-                            action_to_do_after_conversion={
-                                'Converti ed elimina tutti i files precedenti' : 1,
-                                'Converti e mantieni tutti i files' : 2,        #default
-                                'Converti e salva i files precedenti per cancellari in seguito dopo averli controllati con un unico click' : 3
-                            }
-                            behaviour_after_conversion=create_menu(dictio=action_to_do_after_conversion,message='Seleziona cosa vuoi fare con i file originari dopo che sono stati convertiti')
-                            print('Fatto')
-                        results=to_do_after_conversion(behaviour=behaviour_after_conversion,files_paths=converted_files)
+                    
+
+                    if not behaviour_after_conversion and behaviour_after_conversion!=None:
+                        action_to_do_after_conversion={
+                            'Converti ed elimina tutti i files precedenti' : 1,
+                            'Converti e mantieni tutti i files' : 2,        #default
+                            'Converti e salva i files precedenti per cancellari in seguito dopo averli controllati con un unico click' : 3
+                        }
+                        behaviour_after_conversion=create_menu(dictio=action_to_do_after_conversion,message='Seleziona cosa vuoi fare con i file originari dopo che sono stati convertiti')
+                        print('Fatto')
+                    results=to_do_after_conversion(behaviour=behaviour_after_conversion,files_paths=converted_files)
                 except Exception as e:
                     print(f"ERRORE TECNICO: {e}")
                     traceback.print_exc()  # stampa il traceback completo

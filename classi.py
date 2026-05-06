@@ -79,7 +79,7 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
             file_list: List of file paths involved in the operation.
 
         Returns:
-            A dictionary of extra parameters, or {'stop': True} to abort the main loop.
+            A dictionary of extra parameters, or {'stop': True} to abort the main loop but with the operation done, {'stop' : False} to abortthe main loop if there is a problem.
         """
         return {}
 
@@ -163,11 +163,12 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
                 quality=create_menu(message='Scegli la qualità di compressione', dictio=available_quality)
             return {'quality' : quality}
         elif choice==3: #qui non si aggiunge parametri extra ma si usa la funzione per chiamarne un altra senza fare il ciclo for del main
-            if file_list:   #serve per quando si passa più file ma se ne vuole solo uno in output, quindi la funzione unisce i file in uno
+            if file_list and len(file_list)>1:   #serve per quando si passa più file ma se ne vuole solo uno in output, quindi la funzione unisce i file in uno
                 self._merge_PDF(file_list)
                 return {'stop' : True}
-            print('Seleziona più PDF da unire')    #se si entra qui vuol dire che l'utente ha selezionato un solo pdf e ha chiamato la funzione merge
-            return {'stop' : True}  #quindi stampo errore e fermo l'esecuzione
+            else:
+                print('Seleziona più pdf da unire')
+                return {'stop' : False}  #quindi stampo errore e fermo l'esecuzione
         else:
             return {}
 
@@ -376,7 +377,7 @@ class ImageFile(GenericFile):
                 self._convert_to_PDF(file_list)
                 return {'stop' : True}
             print('Nessun file selezionato')
-            return {'stop' : True}
+            return {'stop' : False}
         else:
             return {}
 
