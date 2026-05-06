@@ -15,7 +15,7 @@ import json
 
 ################################################################################################################################
 
-def choose_file() -> tuple | str:
+def choose_file() -> tuple:
     """
     Opens a file dialog to select one or more files.
 
@@ -28,7 +28,8 @@ def choose_file() -> tuple | str:
             comando = ['zenity', '--file-selection', '--multiple', '--separator=|', '--title=Seleziona i file da convertire']
             risultato = subprocess.run(comando, capture_output=True, text=True)
             if risultato.returncode == 0:
-                return tuple(risultato.stdout.strip().split('|'))
+                paths=tuple(risultato.stdout.strip().split('|'))
+                return tuple(sorted(paths))
             return ()
             
         elif shutil.which('kdialog'):
@@ -36,7 +37,8 @@ def choose_file() -> tuple | str:
             risultato = subprocess.run(comando, capture_output=True, text=True)
             if risultato.returncode == 0:
                 # kdialog separa i file con un 'a capo' (newline)
-                return tuple(risultato.stdout.strip().split('\n'))
+                paths = risultato.stdout.strip().split('\n')
+                return tuple(sorted(paths))
             return ()
     root = tkinter.Tk()
     root.withdraw() 
@@ -47,6 +49,8 @@ def choose_file() -> tuple | str:
         filetypes=[("TUTTI I FILE","*.*"),("PDF", "*.pdf"),("IMMAGINI","*.jpg *.jpeg *.png *.HEIC"),("VIDEO","*.mp4 *.mov")]
     )
     root.destroy()  #distruggo finestra
+    if file_path:
+        return tuple(sorted(file_path)) # <--- ORDINAMENTO QUI
     return file_path
 
 #####################################################################################################################################
