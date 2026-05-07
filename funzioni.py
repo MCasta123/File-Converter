@@ -335,7 +335,7 @@ def write_cancellation_log(list_of_path : list | None =None)->bool | str:
         try:
             with open(cancellation_log_path, "w") as file:
                 json.dump({'Torna alla home' : 'Torna alla home'}, file, indent=4)
-                return True
+            return True
         except OSError as e:
             print(f'Errore nel file cancellation_log.json: {e}')
             return False
@@ -351,11 +351,12 @@ def write_cancellation_log(list_of_path : list | None =None)->bool | str:
             try:
                 with open(cancellation_log_path,'w') as file:
                     json.dump(data,file,indent=4)
+                return text
             except OSError as e:
                 print(f'Errore nel file cancellation_log.json:{e}')
                 return False
-        return text
-    return True
+        else:
+            return False
         
         
 def load_cancellation_log(key_to_delete: str | None = None, delete_files: bool =True)-> bool:
@@ -417,7 +418,7 @@ def load_cancellation_log(key_to_delete: str | None = None, delete_files: bool =
         try:    #riscrivo il file json
             with open(cancellation_log_path,'w') as file:
                 json.dump(data,file,indent=4)
-        except FileNotFoundError as e:
+        except OSError as e:
             print(f'Cancellation_log.json non trovato: {e}')
             return False
         if cancelled:

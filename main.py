@@ -21,7 +21,7 @@ if not os.path.exists(os.path.join(get_base_path(),'preferences.toml')): #se è 
 if not os.path.exists(os.path.join(get_base_path(),'cancellation_log.json')): #se non esiste cancellation_log.json lo creo
     write_cancellation_log()
 while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
-    print({'='*100})
+    print('='*100)
     initial_actions={
         'Inizia a convertire' : 1,
         'Impostazioni' : 2,
@@ -35,6 +35,7 @@ while True: #LOOP CHE FA CONTINUARE IL PROGRAMMAS
         converted_files=list(files_paths)
         if files_paths:    #controllo che non sia vuota la tupla
             if check_homogeneity(files_paths):   #controllo che tutti i file siano relativi alla stessa classe
+                behaviour_after_conversion=None
                 try:
                     temp_object=GenericFile.create_from_path(files_paths[0],config=config)  #creo un oggetto temporaneo per poter accedere alle azioni disponibili
                     available_actions=temp_object.get_available_actions()
