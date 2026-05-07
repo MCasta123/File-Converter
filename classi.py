@@ -5,7 +5,7 @@ from pathlib import Path  #libreria importata per estrarre facilmente l' extensi
 from abc import ABC, abstractmethod
 import subprocess
 import pikepdf
-from funzioni import save_as, get_base_path, create_menu , use_settings , get_video_codec
+from funzioni import save_as, get_base_path, create_menu , use_settings , get_video_codec,sort_files
 import platform
 
 
@@ -79,7 +79,7 @@ class GenericFile(ABC):    #classe astratta che gestisce la factory, di questa n
             file_list: List of file paths involved in the operation.
 
         Returns:
-            A dictionary of extra parameters, or {'stop': True} to abort the main loop.
+            A dictionary of extra parameters, or {'stop': True} to abort the main loop but with the operation done, {'stop' : False} to abortthe main loop if there is a problem.
         """
         return {}
 
@@ -163,11 +163,12 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
                 quality=create_menu(message='Scegli la qualità di compressione', dictio=available_quality)
             return {'quality' : quality}
         elif choice==3: #qui non si aggiunge parametri extra ma si usa la funzione per chiamarne un altra senza fare il ciclo for del main
-            if file_list:   #serve per quando si passa più file ma se ne vuole solo uno in output, quindi la funzione unisce i file in uno
+            if file_list and len(file_list)>1:   #serve per quando si passa più file ma se ne vuole solo uno in output, quindi la funzione unisce i file in uno
                 self._merge_PDF(file_list)
                 return {'stop' : True}
-            print('Seleziona più PDF da unire')    #se si entra qui vuol dire che l'utente ha selezionato un solo pdf e ha chiamato la funzione merge
-            return {'stop' : True}  #quindi stampo errore e fermo l'esecuzione
+            else:
+                print('Seleziona più pdf da unire')
+                return {'stop' : False}  #quindi stampo errore e fermo l'esecuzione
         else:
             return {}
 
@@ -299,6 +300,14 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
         if files_paths is None:
             files_paths=[]
         if files_paths:
+            dictionary_of_choice={
+                'Si' : 1,
+                'No, mi va bene l\'ordine alfabetico' : 2
+            }
+            print('I pdf selezionati verranno uniti utilizzando l\'ordine alfabetico')
+            order_choice=create_menu(message="Vuoi scegliere un ordine personalizzato?", dictio=dictionary_of_choice)
+            if order_choice==1:
+                files_paths=sort_files(files_paths)
             if len(files_paths)<=1:
                 print('Seleziona più pdf da unire')
                 return
@@ -376,7 +385,7 @@ class ImageFile(GenericFile):
                 self._convert_to_PDF(file_list)
                 return {'stop' : True}
             print('Nessun file selezionato')
-            return {'stop' : True}
+            return {'stop' : False}
         else:
             return {}
 
@@ -394,6 +403,15 @@ class ImageFile(GenericFile):
         if file_list is None:
             file_list=[]
         if file_list:
+            dictionary_of_choice={
+                'Si' : 1,
+                'No, mi va bene l\'ordine alfabetico' : 2
+            }
+            print('Le immagini selezionate verranno unite per creare un pdf mettendole in ordine alfabetico')
+            order_choice=create_menu(message="Vuoi scegliere un ordine personalizzato?", dictio=dictionary_of_choice)
+            if order_choice==1:
+                file_list=sort_files(file_list)
+                
             output_path = save_as('.pdf')
             other_image=[]
             if not output_path:

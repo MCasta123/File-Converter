@@ -15,7 +15,7 @@ import json
 
 ################################################################################################################################
 
-def choose_file() -> tuple | str:
+def choose_file() -> tuple:
     """
     Opens a file dialog to select one or more files.
 
@@ -28,7 +28,8 @@ def choose_file() -> tuple | str:
             comando = ['zenity', '--file-selection', '--multiple', '--separator=|', '--title=Seleziona i file da convertire']
             risultato = subprocess.run(comando, capture_output=True, text=True)
             if risultato.returncode == 0:
-                return tuple(risultato.stdout.strip().split('|'))
+                paths=tuple(risultato.stdout.strip().split('|'))
+                return tuple(sorted(paths))
             return ()
             
         elif shutil.which('kdialog'):
@@ -36,7 +37,8 @@ def choose_file() -> tuple | str:
             risultato = subprocess.run(comando, capture_output=True, text=True)
             if risultato.returncode == 0:
                 # kdialog separa i file con un 'a capo' (newline)
-                return tuple(risultato.stdout.strip().split('\n'))
+                paths = risultato.stdout.strip().split('\n')
+                return tuple(sorted(paths))
             return ()
     root = tkinter.Tk()
     root.withdraw() 
@@ -47,6 +49,8 @@ def choose_file() -> tuple | str:
         filetypes=[("TUTTI I FILE","*.*"),("PDF", "*.pdf"),("IMMAGINI","*.jpg *.jpeg *.png *.HEIC"),("VIDEO","*.mp4 *.mov")]
     )
     root.destroy()  #distruggo finestra
+    if file_path:
+        return tuple(sorted(file_path)) # <--- ORDINAMENTO QUI
     return file_path
 
 #####################################################################################################################################
@@ -331,7 +335,7 @@ def write_cancellation_log(list_of_path : list | None =None)->bool | str:
         try:
             with open(cancellation_log_path, "w") as file:
                 json.dump({'Torna alla home' : 'Torna alla home'}, file, indent=4)
-                return True
+            return True
         except OSError as e:
             print(f'Errore nel file cancellation_log.json: {e}')
             return False
@@ -347,11 +351,12 @@ def write_cancellation_log(list_of_path : list | None =None)->bool | str:
             try:
                 with open(cancellation_log_path,'w') as file:
                     json.dump(data,file,indent=4)
+                return text
             except OSError as e:
                 print(f'Errore nel file cancellation_log.json:{e}')
                 return False
-        return text
-    return True
+        else:
+            return False
         
         
 def load_cancellation_log(key_to_delete: str | None = None, delete_files: bool =True)-> bool:
@@ -413,7 +418,7 @@ def load_cancellation_log(key_to_delete: str | None = None, delete_files: bool =
         try:    #riscrivo il file json
             with open(cancellation_log_path,'w') as file:
                 json.dump(data,file,indent=4)
-        except FileNotFoundError as e:
+        except OSError as e:
             print(f'Cancellation_log.json non trovato: {e}')
             return False
         if cancelled:
@@ -457,3 +462,29 @@ def get_video_codec(file_path : str)-> str |None:
         print(f"Errore di sistema durante la lettura del codec: {e}")
         return None     
     
+def sort_files(files_paths : tuple[str])->list[str]:
+    """
+    function to let user sort files choosed with function choose_file, it's useful when you need sorted files
+    like in function to create a pdf from the images or in function to merge pdf
+    
+    Args:
+        files_paths: The tuple returned by choose_file
+    Returns:
+        sorted_paths: list with the paths sorted like the user wants.
+        [""] if somethings goes wrong.
+    """
+    
+    sorted_paths=[]
+    if files_paths:
+        dictionary_of_paths={}
+        for file in files_paths:
+            dictionary_of_paths[file]=file
+        print('Utilizzando le frecce direzionali e invio, scegli l\'ordine dei files')
+        while dictionary_of_paths: #itero finchè non è vuoto
+            value_returned=create_menu(message="",dictio=dictionary_of_paths)
+            sorted_paths.append(value_returned)
+            if value_returned in dictionary_of_paths:
+                del dictionary_of_paths[value_returned]
+        return sorted_paths
+    else:
+        return [""]
