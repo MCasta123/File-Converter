@@ -5,7 +5,7 @@ from pathlib import Path  #libreria importata per estrarre facilmente l' extensi
 from abc import ABC, abstractmethod
 import subprocess
 import pikepdf
-from funzioni import save_as, get_base_path, create_menu , use_settings , get_video_codec
+from funzioni import save_as, get_base_path, create_menu , use_settings , get_video_codec,sort_files
 import platform
 
 
@@ -300,6 +300,14 @@ class PDFFile(GenericFile):        #classe che gestisce i file pdf
         if files_paths is None:
             files_paths=[]
         if files_paths:
+            dictionary_of_choice={
+                'Si' : 1,
+                'No, mi va bene l\'ordine alfabetico' : 2
+            }
+            print('I pdf selezionati verranno uniti utilizzando l\'ordine alfabetico')
+            order_choice=create_menu(message="Vuoi scegliere un ordine personalizzato?", dictio=dictionary_of_choice)
+            if order_choice==1:
+                files_paths=sort_files(files_paths)
             if len(files_paths)<=1:
                 print('Seleziona più pdf da unire')
                 return
@@ -395,6 +403,15 @@ class ImageFile(GenericFile):
         if file_list is None:
             file_list=[]
         if file_list:
+            dictionary_of_choice={
+                'Si' : 1,
+                'No, mi va bene l\'ordine alfabetico' : 2
+            }
+            print('Le immagini selezionate verranno unite per creare un pdf mettendole in ordine alfabetico')
+            order_choice=create_menu(message="Vuoi scegliere un ordine personalizzato?", dictio=dictionary_of_choice)
+            if order_choice==1:
+                file_list=sort_files(file_list)
+                
             output_path = save_as('.pdf')
             other_image=[]
             if not output_path:
