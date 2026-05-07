@@ -461,3 +461,29 @@ def get_video_codec(file_path : str)-> str |None:
         print(f"Errore di sistema durante la lettura del codec: {e}")
         return None     
     
+def sort_files(files_paths : tuple[str])->list[str]:
+    """
+    function to let user sort files choosed with function choose_file, it's useful when you need sorted files
+    like in function to create a pdf from the images or in function to merge pdf
+    
+    Args:
+        files_paths: The tuple returned by choose_file
+    Returns:
+        sorted_paths: list with the paths sorted like the user wants.
+        [""] if somethings goes wrong.
+    """
+    
+    sorted_paths=[]
+    if files_paths:
+        dictionary_of_paths={}
+        for file in files_paths:
+            dictionary_of_paths[file]=file
+        print('Utilizzando le frecce direzionali e invio, scegli l\'ordine dei files')
+        while dictionary_of_paths: #itero finchè non è vuoto
+            value_returned=create_menu(message="",dictio=dictionary_of_paths)
+            sorted_paths.append(value_returned)
+            if value_returned in dictionary_of_paths:
+                del dictionary_of_paths[value_returned]
+        return sorted_paths
+    else:
+        return [""]
