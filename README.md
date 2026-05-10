@@ -124,8 +124,3 @@ progetto/
 ```bash
 python main.py
 ```
-
-### NOTA FINALE SUGLI ESEGUIBILI
-
-Scaricando l'ultima Release troverete due file .exe. Entrambi i programmi condividono lo stesso "motore" di conversione e svolgono le stesse identiche funzioni.
-Il file Convertitore.exe è basato sul codice che trovate in questa repository ed è stato sviluppato interamente da me. Il file ConvertitoreGrafico.exe include invece una comoda interfaccia grafica che però non ho scritto io ma google ai studio, quindi ho optato per non caricarla qui su github; vi lascio comunque l'eseguibile qualora preferiate usare l'interfaccia visiva!
